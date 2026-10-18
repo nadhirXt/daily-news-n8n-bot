@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Carrousel LinkedIn — daily-news-n8n-bot</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #0B0F19;
+      color: #F3F4F6;
+      margin: 0;
+      padding: 20px;
+    }
+    .slide-page {
+      width: 1080px;
+      height: 1350px;
+      margin: 0 auto 40px auto;
+      background: linear-gradient(145deg, #0F172A 0%, #090D16 100%);
+      border: 1px solid #1E293B;
+      border-radius: 24px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 80px 70px;
+      box-sizing: border-box;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+    .mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    @media print {
+      body {
+        background: transparent !important;
+        padding: 0 !important;
+      }
+      .slide-page {
+        margin: 0 !important;
+        border: none !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        page-break-after: always;
+        break-after: page;
+        width: 1080px !important;
+        height: 1350px !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      .no-print {
+        display: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Instructions non imprimées -->
+  <div class="no-print max-w-4xl mx-auto mb-8 p-6 bg-blue-950/60 border border-blue-500/30 rounded-2xl flex items-center justify-between">
+    <div>
+      <h2 class="text-xl font-bold text-blue-300">Générer votre Carrousel PDF en 10 secondes</h2>
+      <p class="text-sm text-slate-300 mt-1">Appuyez sur <kbd class="px-2 py-1 bg-slate-800 rounded font-mono text-xs">Ctrl + P</kbd> (ou Cmd + P) &gt; Destination : <b>Enregistrer au format PDF</b> &gt; Marges : <b>Aucune</b> &gt; Graphiques d'arrière-plan : <b>Coché</b>.</p>
+    </div>
+    <button onclick="window.print()" class="px-6 py-3 bg-blue-600 hover:bg-blue-500 font-bold rounded-xl shadow-lg transition">Imprimer en PDF</button>
+  </div>
+
+  <!-- SLIDE 1 : COUVERTURE -->
+  <div class="slide-page">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <span class="px-3 py-1 bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded-full text-sm font-semibold">Projet Open Source</span>
+        <span class="text-slate-500 text-sm">·</span>
+        <span class="text-slate-400 text-sm font-medium">ESB & Ingénierie</span>
+      </div>
+      <div class="text-slate-500 text-sm mono">01 / 05</div>
+    </div>
+
+    <div class="my-auto space-y-8">
+      <div class="inline-flex items-center space-x-3 px-4 py-2 bg-slate-800/80 border border-slate-700/60 rounded-xl">
+        <span class="text-2xl">⏰</span>
+        <span class="text-slate-200 font-semibold mono">07:00 du matin</span>
+      </div>
+      
+      <h1 class="text-6xl font-extrabold leading-tight tracking-tight">
+        Remplacer le <span class="text-red-400 line-through">scroll passif</span> du réveil par l'essentiel de l'actu.
+      </h1>
+
+      <p class="text-2xl text-slate-300 leading-relaxed font-normal">
+        Comment j'ai conçu un bot autonome sous <b class="text-white">n8n</b> et <b class="text-white">Google Gemini</b> pour ma promotion à l'École Supérieure de Banque (ESB).
+      </p>
+
+      <div class="flex flex-wrap gap-3 pt-4">
+        <span class="px-4 py-2 bg-slate-800/70 border border-slate-700 text-slate-300 rounded-lg text-sm">📡 16 Flux RSS</span>
+        <span class="px-4 py-2 bg-slate-800/70 border border-slate-700 text-slate-300 rounded-lg text-sm">🛡️ Zéro Hallucination</span>
+        <span class="px-4 py-2 bg-slate-800/70 border border-slate-700 text-slate-300 rounded-lg text-sm">💬 Telegram Privé</span>
+      </div>
+    </div>
+
+    <div class="flex items-center justify-between pt-6 border-t border-slate-800">
+      <div class="flex items-center space-x-4">
+        <div class="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center font-bold text-lg text-white">MN</div>
+        <div>
+          <div class="font-bold text-white">Mohamed Nadhir Benelhadj</div>
+          <div class="text-sm text-slate-400">Étudiant ESB · Ancien élève ENPO Maurice Audin</div>
+        </div>
+      </div>
+      <div class="text-blue-400 font-semibold flex items-center space-x-1">
+        <span>Glisser</span>
+        <span>→</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 2 : LE CONSTAT -->
+  <div class="slide-page">
+    <div class="flex items-center justify-between">
+      <span class="text-blue-400 text-sm font-semibold tracking-wider uppercase">02. Le Constat</span>
+      <span class="text-slate-500 text-sm mono">02 / 05</span>
+    </div>
+
+    <div class="my-auto space-y-10">
+      <h2 class="text-5xl font-extrabold leading-tight">
+        Le problème de départ au sein de la promo
+      </h2>
+
+      <div class="space-y-6">
+        <div class="p-6 bg-slate-800/50 border border-slate-700/60 rounded-2xl flex items-start space-x-5">
+          <div class="p-3 bg-red-500/10 text-red-400 rounded-xl text-2xl font-bold">1</div>
+          <div>
+            <h3 class="text-2xl font-bold text-white mb-2">Une veille obligatoire mais chronophage</h3>
+            <p class="text-lg text-slate-300">En finance et en économie bancaire, suivre les décisions des banques centrales (BCE, Fed) et les marchés est indispensable pour nos cours et nos mémoires.</p>
+          </div>
+        </div>
+
+        <div class="p-6 bg-slate-800/50 border border-slate-700/60 rounded-2xl flex items-start space-x-5">
+          <div class="p-3 bg-red-500/10 text-red-400 rounded-xl text-2xl font-bold">2</div>
+          <div>
+            <h3 class="text-2xl font-bold text-white mb-2">L'infobésité dès le réveil</h3>
+            <p class="text-lg text-slate-300">Personne n'a 45 minutes le matin pour ouvrir 20 onglets différents ou lire 10 newsletters promotionnelles.</p>
+          </div>
+        </div>
+
+        <div class="p-6 bg-slate-800/50 border border-slate-700/60 rounded-2xl flex items-start space-x-5">
+          <div class="p-3 bg-blue-500/10 text-blue-400 rounded-xl text-2xl font-bold">3</div>
+          <div>
+            <h3 class="text-2xl font-bold text-white mb-2">L'objectif</h3>
+            <p class="text-lg text-slate-300">Construire un outil qui fait le tri à notre place pendant la nuit et dépose l'essentiel sur nos téléphones à l'heure exacte du réveil (07:00).</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex items-center justify-between pt-6 border-t border-slate-800 text-slate-400 text-sm">
+      <span>daily-news-n8n-bot</span>
+      <span>Glisser →</span>
+    </div>
+  </div>
+
+  <!-- SLIDE 3 : LA MECANIQUE N8N & ANTI-HALLUCINATION -->
+  <div class="slide-page">
+    <div class="flex items-center justify-between">
+      <span class="text-blue-400 text-sm font-semibold tracking-wider uppercase">03. La Solution Technique</span>
+      <span class="text-slate-500 text-sm mono">03 / 05</span>
+    </div>
+
+    <div class="my-auto space-y-8">
+      <h2 class="text-5xl font-extrabold leading-tight">
+        Sous le capot : n8n et la règle du verbatim
+      </h2>
+
+      <p class="text-xl text-slate-300">
+        Les IA classiques ont un défaut majeur : elles déforment les chiffres et inventent des liens morts. Voici comment le pipeline sécurise chaque information :
+      </p>
+
+      <div class="grid grid-cols-1 gap-5">
+        <div class="p-6 bg-slate-800/60 border border-slate-700 rounded-2xl">
+          <div class="flex items-center space-x-3 text-blue-400 font-bold text-lg mb-2">
+            <span>📡</span>
+            <h4>16 Flux RSS Certifiés en Parallèle</h4>
+          </div>
+          <p class="text-slate-300">BCE, Réserve Fédérale, Le Monde Éco, Financial Times, TechCrunch... Tout est scanné sans dépendre d'un scraper web fragile.</p>
+        </div>
+
+        <div class="p-6 bg-slate-800/60 border border-slate-700 rounded-2xl">
+          <div class="flex items-center space-x-3 text-emerald-400 font-bold text-lg mb-2">
+            <span>🛡️</span>
+            <h4>Contrôle de la Preuve Verbatim (≤ 15 mots)</h4>
+          </div>
+          <p class="text-slate-300">Le modèle Gemini 3.8 Flash doit obligatoirement extraire une phrase mot pour mot du texte d'origine. Si la phrase ou les chiffres sont absents de la source, l'article est bloqué.</p>
+        </div>
+
+        <div class="p-6 bg-slate-800/60 border border-slate-700 rounded-2xl">
+          <div class="flex items-center space-x-3 text-amber-400 font-bold text-lg mb-2">
+            <span>🔗</span>
+            <h4>Zéro URL générée par l'IA</h4>
+          </div>
+          <p class="text-slate-300">Le modèle ne touche jamais aux liens. C'est n8n qui réinjecte les URLs officielles directement issues des flux originaux.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex items-center justify-between pt-6 border-t border-slate-800 text-slate-400 text-sm">
+      <span>Validation mathématique et textuelle</span>
+      <span>Glisser →</span>
+    </div>
+  </div>
+
+  <!-- SLIDE 4 : L'EXPERIENCE UTILISATEUR TELEGRAM -->
+  <div class="slide-page">
+    <div class="flex items-center justify-between">
+      <span class="text-blue-400 text-sm font-semibold tracking-wider uppercase">04. L'Usage au Quotidien</span>
+      <span class="text-slate-500 text-sm mono">04 / 05</span>
+    </div>
+
+    <div class="my-auto space-y-8">
+      <h2 class="text-5xl font-extrabold leading-tight">
+        Un briefing propre reçu en privé à 07:00
+      </h2>
+
+      <p class="text-xl text-slate-300">
+        Pas de canal encombré où tout le monde parle. Le bot dialogue en direct et en privé avec chaque étudiant.
+      </p>
+
+      <div class="p-8 bg-slate-900 border border-blue-500/30 rounded-3xl space-y-4 shadow-xl">
+        <div class="flex items-center space-x-3 border-b border-slate-800 pb-4">
+          <div class="w-10 h-10 bg-blue-500 rounded-xl flex items-center justify-center font-bold">🤖</div>
+          <div>
+            <div class="font-bold text-white">NewsRecapBot</div>
+            <div class="text-xs text-blue-400">Bot officiel · En direct</div>
+          </div>
+        </div>
+
+        <div class="space-y-3 font-mono text-sm text-slate-300">
+          <div class="text-amber-400 font-bold">⚡ BRIEFING DU JOUR (07:00)</div>
+          <div>🤖 <b>IA :</b> Nouveaux modèles et régulation</div>
+          <div>🌍 <b>Économie mondiale :</b> Taux directeurs et marchés</div>
+          <div>💻 <b>Tech :</b> Cybersécurité et infrastructures</div>
+        </div>
+
+        <div class="grid grid-cols-3 gap-2 pt-4">
+          <div class="p-2 bg-slate-800 rounded text-center text-xs text-slate-300">📰 /actualites</div>
+          <div class="p-2 bg-slate-800 rounded text-center text-xs text-slate-300">🤖 /filter_ia</div>
+          <div class="p-2 bg-slate-800 rounded text-center text-xs text-slate-300">🌍 /filter_eco</div>
+        </div>
+      </div>
+
+      <div class="p-4 bg-emerald-950/40 border border-emerald-500/30 rounded-xl text-emerald-300 text-sm">
+        ✅ <b>100% sans distraction</b> : Lecture complète en 60 secondes chrono avant les premiers cours.
+      </div>
+    </div>
+
+    <div class="flex items-center justify-between pt-6 border-t border-slate-800 text-slate-400 text-sm">
+      <span>Disponible sur smartphone & desktop</span>
+      <span>Glisser →</span>
+    </div>
+  </div>
+
+  <!-- SLIDE 5 : OPEN SOURCE & SUITE INSTAGRAM -->
+  <div class="slide-page">
+    <div class="flex items-center justify-between">
+      <span class="text-blue-400 text-sm font-semibold tracking-wider uppercase">05. Open Source & Avenir</span>
+      <span class="text-slate-500 text-sm mono">05 / 05</span>
+    </div>
+
+    <div class="my-auto space-y-8">
+      <div class="inline-block px-4 py-1.5 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-full text-sm font-semibold">
+        Partage Communautaire
+      </div>
+
+      <h2 class="text-5xl font-extrabold leading-tight">
+        De la promo ESB à toute la communauté étudiante
+      </h2>
+
+      <p class="text-xl text-slate-300 leading-relaxed">
+        Ce qui a commencé comme une solution pour ma propre classe est aujourd'hui accessible à toute l'école, et le code est entièrement ouvert à tous les étudiants et développeurs.
+      </p>
+
+      <div class="p-6 bg-slate-800/60 border border-slate-700 rounded-2xl space-y-3">
+        <h4 class="text-xl font-bold text-white">🚀 Prochaine étape : Scaling vers Instagram</h4>
+        <p class="text-slate-300">
+          Instagram étant le réseau le plus consulté par les étudiants, j'adapte actuellement le pipeline pour transformer ces synthèses en carrousels et visuels dynamiques automatiques.
+        </p>
+      </div>
+
+      <div class="p-6 bg-blue-950/40 border border-blue-500/30 rounded-2xl">
+        <div class="text-sm text-blue-300 font-semibold mb-1">Dépôt GitHub public :</div>
+        <div class="text-xl font-bold text-white mono break-all">github.com/nadhirXt/daily-news-n8n-bot</div>
+        <div class="text-xs text-slate-400 mt-2">Docker Compose en 1 clic · Licence MIT · Documentation complète</div>
+      </div>
+    </div>
+
+    <div class="flex items-center justify-between pt-6 border-t border-slate-800">
+      <div class="font-bold text-white">Mohamed Nadhir Benelhadj</div>
+      <div class="text-blue-400 font-bold">Lien dans le post LinkedIn ↗</div>
+    </div>
+  </div>
+
+</body>
+</html>
