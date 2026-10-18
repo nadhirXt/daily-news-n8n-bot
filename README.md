@@ -26,7 +26,7 @@ Chaque matin (ou à la demande), le bot :
 graph TD
     Trigger["⏰ Schedule Trigger (07:00 Africa/Algiers)"] --> Config["⚙️ Config (Quotas, IDs)"]
     Config --> Feeds["📡 16 Flux RSS Certifiés (Parallèle)"]
-    Feeds --> Norm["🧹 Normaliser, Filtrer (<24h) & Dédoublonner"]
+    Feeds --> Norm["🧹 Normaliser, Filtrer (moins de 24h) & Dédoublonner"]
     Norm --> Gemini["🤖 Google Gemini 3.8 Flash (Structured Outputs)"]
     Gemini --> Validate["🛡️ Contrôle Preuve Verbatim & Audit Chiffres"]
     Validate -->|100% Conforme| Formater["📝 Découpage & Sauvegarde Synthèse"]
@@ -34,7 +34,7 @@ graph TD
     Formater --> SendTelegram["📤 Diffusion Directe aux Abonnés Telegram"]
     SendTelegram --> SaveSent["💾 Rétention Anti-Doublon (14 jours)"]
 
-    subgraph Interaction Bot Direct (Privé)
+    subgraph BotDirect["Interaction Bot Direct (Privé)"]
         UserMsg["👤 Utilisateur Telegram (/start, /actualites)"] --> BotTrigger["⚡ Telegram Bot Trigger"]
         BotTrigger --> BotHandler["🧠 Bot Router & Gestionnaire d'Abonnés"]
         BotHandler --> BotReply["💬 Envoi Réponse & Synthèse Immédiate"]
