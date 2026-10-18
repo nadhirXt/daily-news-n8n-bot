@@ -1,0 +1,1415 @@
+{
+  "name": "News – Collecte",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 7 * * *"
+            }
+          ]
+        }
+      },
+      "id": "schedule_trigger",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -200,
+        750
+      ],
+      "notes": "Heure quotidienne d'exécution (07:00 Africa/Algiers). Unique endroit de réglage de l'heure."
+    },
+    {
+      "parameters": {},
+      "id": "manual_trigger",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -200,
+        600
+      ],
+      "notes": "Déclenchement manuel pour tests et exécution à la demande."
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c1",
+              "name": "window_hours",
+              "value": 24,
+              "type": "number"
+            },
+            {
+              "id": "c2",
+              "name": "max_articles",
+              "value": 60,
+              "type": "number"
+            },
+            {
+              "id": "c3",
+              "name": "quota_ia",
+              "value": 25,
+              "type": "number"
+            },
+            {
+              "id": "c4",
+              "name": "quota_economie",
+              "value": 20,
+              "type": "number"
+            },
+            {
+              "id": "c5",
+              "name": "quota_tech",
+              "value": 15,
+              "type": "number"
+            },
+            {
+              "id": "c6",
+              "name": "gemini_model",
+              "value": "gemini-2.5-flash",
+              "type": "string"
+            },
+            {
+              "id": "c7",
+              "name": "telegram_chat_id",
+              "value": "YOUR_TELEGRAM_CHAT_ID",
+              "type": "string"
+            },
+            {
+              "id": "c8",
+              "name": "admin_chat_id",
+              "value": "YOUR_ADMIN_CHAT_ID",
+              "type": "string"
+            },
+            {
+              "id": "c9",
+              "name": "test_mode",
+              "value": true,
+              "type": "boolean"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "config",
+      "name": "Config",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        40,
+        750
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://research.google/blog/rss/"
+      },
+      "id": "rss_google_research",
+      "name": "RSS Google Research",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        300,
+        100
+      ],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "// Tag metadata for Google Research\nconst items = $input.all();\nreturn items.map(item => ({\n  json: {\n    ...item.json,\n    feedSource: 'Google Research',\n    feedTier: 1,\n    feedType: 'annonce_entreprise',\n    feedDefaultCategory: 'ia'\n  }\n}));"
+      },
+      "id": "tag_google_research",
+      "name": "Tag Google Research",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        540,
+        100
+      ],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "url": "https://openai.com/news/rss.xml"
+      },
+      "id": "rss_openai",
+      "name": "RSS OpenAI",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        300,
+        190
+      ],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "// Tag metadata for OpenAI\nconst items = $input.all();\nreturn items.map(item => ({\n  json: {\n    ...item.json,\n    feedSource: 'OpenAI',\n    feedTier: 1,\n    feedType: 'annonce_entreprise',\n    feedDefaultCategory: 'ia'\n  }\n}));"
+      },
+      "id": "tag_openai",
+      "name": "Tag OpenAI",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        540,
+        190
+      ],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "url": "https://blogs.nvidia.com/feed/"
+      },
+      "id": "rss_nvidia",
+      "name": "RSS NVIDIA Blog",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        300,
+        280
+      ],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "// Tag metadata for NVIDIA Blog\nconst items = $input.all();\nreturn items.map(item => ({\n  json: {\n    ...item.json,\n    feedSource: 'NVIDIA Blog',\n    feedTier: 1,\n    feedType: 'annonce_entreprise',\n    feedDefaultCategory: 'ia'\n  }\n}));"
+      },
+      "id": "tag_nvidia",
+      "name": "Tag NVIDIA Blog",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        540,
+        280
+      ],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "url": "https://huggingface.co/blog/feed.xml"
+      },
+      "id": "rss_huggingface",
+      "name": "RSS Hugging Face Blog",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        300,
+        370
+      ],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "// Tag metadata for Hugging Face Blog\nconst items = $input.all();\nreturn items.map(item => ({\n  json: {\n    ...item.json,\n    feedSource: 'Hugging Face Blog',\n    feedTier: 1,\n    feedType: 'annonce_entreprise',\n    feedDefaultCategory: 'ia'\n  }\n}));"
+      },
+      "id": "tag_huggingface",
+      "name": "Tag Hugging Face Blog",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        540,
+        370
+      ],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "url": "https://www.ecb.europa.eu/rss/press.html"
+      },
+      "id": "rss_bce",
+      "name": "RSS BCE / ECB Press",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        300,
+        460
+      ],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "// Tag metadata for BCE / ECB Press\nconst items = $input.all();\nreturn items.map(item => ({\n  json: {\n    ...item.json,\n    feedSource: 'BCE / ECB Press',\n    feedTier: 1,\n    feedType: 'donnees_officielles',\n    feedDefaultCategory: 'economie'\n  }\n}));"
+      },
+      "id": "tag_bce",
+      "name": "Tag BCE / ECB Press",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        540,
+        460
+      ],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "url": "https://www.federalreserve.gov/feeds/press_all.xml"
+      },
+      "id": "rss_fed",
+      "name": "RSS Federal Reserve Press",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        300,
+        550
+      ],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "// Tag metadata for Federal Reserve Press\nconst items = $input.all();\nreturn items.map(item => ({\n  json: {\n    ...item.json,\n    feedSource: 'Federal Reserve Press',\n    feedTier: 1,\n    feedType: 'donnees_officielles',\n    feedDefaultCategory: 'economie'\n  }\n}));"
+      },
+      "id": "tag_fed",
+      "name": "Tag Federal Reserve Press",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        540,
+        550
+      ],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "url": "https://feeds.bbci.co.uk/news/business/rss.xml"
+      },
+      "id": "rss_bbc_business",
+      "name": "RSS BBC Business",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        300,
+        640
+      ],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "// Tag metadata for BBC Business\nconst items = $input.all();\nreturn items.map(item => ({\n  json: {\n    ...item.json,\n    feedSource: 'BBC Business',\n    feedTier: 2,\n    feedType: 'reportage',\n    feedDefaultCategory: 'economie'\n  }\n}));"
+      },
+      "id": "tag_bbc_business",
+      "name": "Tag BBC Business",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        540,
+        640
+      ],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "url": "https://www.france24.com/fr/%C3%A9co-tech/rss"
+      },
+      "id": "rss_france24_eco",
+      "name": "RSS France 24 Éco-Tech",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        300,
+        730
+      ],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "// Tag metadata for France 24 Éco-Tech\nconst items = $input.all();\nreturn items.map(item => ({\n  json: {\n    ...item.json,\n    feedSource: 'France 24 Éco-Tech',\n    feedTier: 2,\n    feedType: 'reportage',\n    feedDefaultCategory: 'economie'\n  }\n}));"
+      },
+      "id": "tag_france24_eco",
+      "name": "Tag France 24 Éco-Tech",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        540,
+        730
+      ],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "url": "https://rss.dw.com/rdf/rss-en-bus"
+      },
+      "id": "rss_dw_business",
+      "name": "RSS DW Business",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        300,
+        820
+      ],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "// Tag metadata for DW Business\nconst items = $input.all();\nreturn items.map(item => ({\n  json: {\n    ...item.json,\n    feedSource: 'DW Business',\n    feedTier: 2,\n    feedType: 'reportage',\n    feedDefaultCategory: 'economie'\n  }\n}));"
+      },
+      "id": "tag_dw_business",
+      "name": "Tag DW Business",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        540,
+        820
+      ],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "url": "https://www.lemonde.fr/economie/rss_full.xml"
+      },
+      "id": "rss_lemonde_eco",
+      "name": "RSS Le Monde Économie",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        300,
+        910
+      ],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "// Tag metadata for Le Monde Économie\nconst items = $input.all();\nreturn items.map(item => ({\n  json: {\n    ...item.json,\n    feedSource: 'Le Monde Économie',\n    feedTier: 2,\n    feedType: 'reportage',\n    feedDefaultCategory: 'economie'\n  }\n}));"
+      },
+      "id": "tag_lemonde_eco",
+      "name": "Tag Le Monde Économie",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        540,
+        910
+      ],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "url": "https://www.theguardian.com/uk/business/rss"
+      },
+      "id": "rss_guardian_business",
+      "name": "RSS The Guardian Business",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        300,
+        1000
+      ],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "// Tag metadata for The Guardian Business\nconst items = $input.all();\nreturn items.map(item => ({\n  json: {\n    ...item.json,\n    feedSource: 'The Guardian Business',\n    feedTier: 2,\n    feedType: 'reportage',\n    feedDefaultCategory: 'economie'\n  }\n}));"
+      },
+      "id": "tag_guardian_business",
+      "name": "Tag The Guardian Business",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        540,
+        1000
+      ],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "url": "https://feeds.content.dowjones.io/public/rss/mw_topstories"
+      },
+      "id": "rss_marketwatch",
+      "name": "RSS MarketWatch",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        300,
+        1090
+      ],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "// Tag metadata for MarketWatch\nconst items = $input.all();\nreturn items.map(item => ({\n  json: {\n    ...item.json,\n    feedSource: 'MarketWatch',\n    feedTier: 2,\n    feedType: 'reportage',\n    feedDefaultCategory: 'economie'\n  }\n}));"
+      },
+      "id": "tag_marketwatch",
+      "name": "Tag MarketWatch",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        540,
+        1090
+      ],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "url": "https://www.technologyreview.com/topic/artificial-intelligence/feed/"
+      },
+      "id": "rss_mit_tech_review",
+      "name": "RSS MIT Tech Review AI",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        300,
+        1180
+      ],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "// Tag metadata for MIT Tech Review AI\nconst items = $input.all();\nreturn items.map(item => ({\n  json: {\n    ...item.json,\n    feedSource: 'MIT Tech Review AI',\n    feedTier: 3,\n    feedType: 'reportage',\n    feedDefaultCategory: 'ia'\n  }\n}));"
+      },
+      "id": "tag_mit_tech_review",
+      "name": "Tag MIT Tech Review AI",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        540,
+        1180
+      ],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "url": "https://techcrunch.com/category/artificial-intelligence/feed/"
+      },
+      "id": "rss_techcrunch_ai",
+      "name": "RSS TechCrunch AI",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        300,
+        1270
+      ],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "// Tag metadata for TechCrunch AI\nconst items = $input.all();\nreturn items.map(item => ({\n  json: {\n    ...item.json,\n    feedSource: 'TechCrunch AI',\n    feedTier: 3,\n    feedType: 'reportage',\n    feedDefaultCategory: 'ia'\n  }\n}));"
+      },
+      "id": "tag_techcrunch_ai",
+      "name": "Tag TechCrunch AI",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        540,
+        1270
+      ],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "url": "https://feeds.arstechnica.com/arstechnica/index"
+      },
+      "id": "rss_arstechnica",
+      "name": "RSS Ars Technica",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        300,
+        1360
+      ],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "// Tag metadata for Ars Technica\nconst items = $input.all();\nreturn items.map(item => ({\n  json: {\n    ...item.json,\n    feedSource: 'Ars Technica',\n    feedTier: 3,\n    feedType: 'reportage',\n    feedDefaultCategory: 'tech'\n  }\n}));"
+      },
+      "id": "tag_arstechnica",
+      "name": "Tag Ars Technica",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        540,
+        1360
+      ],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "url": "https://www.theverge.com/rss/index.xml"
+      },
+      "id": "rss_theverge",
+      "name": "RSS The Verge",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        300,
+        1450
+      ],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "// Tag metadata for The Verge\nconst items = $input.all();\nreturn items.map(item => ({\n  json: {\n    ...item.json,\n    feedSource: 'The Verge',\n    feedTier: 3,\n    feedType: 'reportage',\n    feedDefaultCategory: 'tech'\n  }\n}));"
+      },
+      "id": "tag_theverge",
+      "name": "Tag The Verge",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        540,
+        1450
+      ],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "mode": "append"
+      },
+      "id": "merge_l1_1",
+      "name": "Merge L1_1",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        800,
+        140
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "append"
+      },
+      "id": "merge_l1_2",
+      "name": "Merge L1_2",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        800,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "append"
+      },
+      "id": "merge_l1_3",
+      "name": "Merge L1_3",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        800,
+        500
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "append"
+      },
+      "id": "merge_l1_4",
+      "name": "Merge L1_4",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        800,
+        680
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "append"
+      },
+      "id": "merge_l1_5",
+      "name": "Merge L1_5",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        800,
+        860
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "append"
+      },
+      "id": "merge_l1_6",
+      "name": "Merge L1_6",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        800,
+        1040
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "append"
+      },
+      "id": "merge_l1_7",
+      "name": "Merge L1_7",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        800,
+        1220
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "append"
+      },
+      "id": "merge_l1_8",
+      "name": "Merge L1_8",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        800,
+        1400
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "append"
+      },
+      "id": "merge_l2_1",
+      "name": "Merge L2_1",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1020,
+        230
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "append"
+      },
+      "id": "merge_l2_2",
+      "name": "Merge L2_2",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1020,
+        590
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "append"
+      },
+      "id": "merge_l2_3",
+      "name": "Merge L2_3",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1020,
+        950
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "append"
+      },
+      "id": "merge_l2_4",
+      "name": "Merge L2_4",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1020,
+        1310
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "append"
+      },
+      "id": "merge_l3_1",
+      "name": "Merge L3_1",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1240,
+        410
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "append"
+      },
+      "id": "merge_l3_2",
+      "name": "Merge L3_2",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1240,
+        1130
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "append"
+      },
+      "id": "merge_final",
+      "name": "Merge Final",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1460,
+        750
+      ]
+    },
+    {
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "// Nœud Code \"Normaliser\"\nconst items = $input.all();\nconst config = $('Config').first().json || {};\nconst windowHours = config.window_hours || 24;\nconst maxArticles = config.max_articles || 60;\nconst quotas = {\n  ia: config.quota_ia || 25,\n  economie: config.quota_economie || 20,\n  tech: config.quota_tech || 15\n};\n\nconst now = Date.now();\nconst windowMs = windowHours * 3600 * 1000;\nconst retentionMs = 14 * 24 * 3600 * 1000; // 14 jours de rétention\n\n// Récupération des URLs déjà envoyées via staticData\nconst staticData = $getWorkflowStaticData('global');\nif (!staticData.sentUrls) staticData.sentUrls = {};\n\n// Nettoyage de la rétention (> 14 jours)\nfor (const [url, timestamp] of Object.entries(staticData.sentUrls)) {\n  if (now - timestamp > retentionMs) {\n    delete staticData.sentUrls[url];\n  }\n}\n\nfunction cleanUrl(rawUrl) {\n  if (!rawUrl) return '';\n  try {\n    const u = new URL(rawUrl);\n    const trackingParams = [\n      'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content',\n      'fbclid', 'gclid', '_hsenc', '_hsmi', 'mc_cid', 'mc_eid'\n    ];\n    trackingParams.forEach(p => u.searchParams.delete(p));\n    if (u.hostname.includes('news.google.com')) return '';\n    return u.toString();\n  } catch (e) {\n    return rawUrl.split('?')[0];\n  }\n}\n\nfunction normalizeTitle(t) {\n  return (t || '').toLowerCase()\n    .normalize('NFD').replace(/[\\u0300-\\u036f]/g, '')\n    .replace(/[^a-z0-9]/g, ' ')\n    .split(/\\s+/)\n    .filter(w => w.length > 2);\n}\n\nfunction titleSimilarity(wordsA, wordsB) {\n  if (!wordsA.length || !wordsB.length) return 0;\n  const setA = new Set(wordsA);\n  const setB = new Set(wordsB);\n  let common = 0;\n  for (const w of setA) {\n    if (setB.has(w)) common++;\n  }\n  const union = new Set([...setA, ...setB]).size;\n  return union === 0 ? 0 : common / union;\n}\n\nconst seenUrls = new Set();\nconst seenTitles = [];\nlet duplicatesCount = 0;\nlet alreadySentCount = 0;\nlet filteredOldCount = 0;\nconst rawArticles = [];\n\nconst iaRegex = /\\b(ai|artificial intelligence|intelligence artificielle|llm|llms|gpt|gemini|openai|anthropic|claude|deepmind|copilot|deep learning|machine learning|neural|gpu|gpus|nvidia|hugging face|mistral|generative ai|genai|agent|agents)\\b/i;\nconst ecoRegex = /\\b(inflation|taux|banque centrale|bce|fed|federal reserve|fmi|imf|pib|gdp|croissance|recession|marche|marches|bourse|actions|obligations|economie|economy|dette|deficit|chomage|employment|tarifs|commerce|trade|oil|petrole)\\b/i;\nconst techRegex = /\\b(tech|technologie|technology|cyber|cybersecurite|software|logiciel|apple|microsoft|google|amazon|meta|hardware|semiconducteur|chips|cloud|quantum|robotique|robotics)\\b/i;\n\nfor (const item of items) {\n  const d = item.json;\n  const title = (d.title || '').trim();\n  const rawLink = d.link || d.guid || '';\n  const link = cleanUrl(rawLink);\n\n  if (!title || !link) continue;\n\n  // Exclusion si déjà envoyé dans les 14 jours\n  if (staticData.sentUrls[link]) {\n    alreadySentCount++;\n    continue;\n  }\n\n  // Dédoublonnage URL\n  if (seenUrls.has(link)) {\n    duplicatesCount++;\n    continue;\n  }\n\n  // Dédoublonnage par similarité de titre (overlap >= 0.60)\n  const titleWords = normalizeTitle(title);\n  let isDupTitle = false;\n  for (const seen of seenTitles) {\n    if (titleSimilarity(titleWords, seen.words) >= 0.60) {\n      isDupTitle = true;\n      seen.sources.add(d.feedSource);\n      duplicatesCount++;\n      break;\n    }\n  }\n  if (isDupTitle) continue;\n\n  seenUrls.add(link);\n  seenTitles.push({ words: titleWords, sources: new Set([d.feedSource]), title });\n\n  // Filtrage fenêtre temporelle (window_hours)\n  let pubDate = null;\n  if (d.isoDate) pubDate = new Date(d.isoDate);\n  else if (d.pubDate) pubDate = new Date(d.pubDate);\n\n  if (pubDate && !isNaN(pubDate.getTime())) {\n    if (now - pubDate.getTime() > windowMs) {\n      filteredOldCount++;\n      continue;\n    }\n  }\n\n  // Nettoyage texte (max 1200 caractères)\n  const rawSnippet = d.contentSnippet || d.content || d.summary || title;\n  const cleanSnippet = rawSnippet.replace(/<[^>]*>?/gm, ' ').replace(/\\s+/g, ' ').trim().slice(0, 1200);\n\n  // Catégorisation\n  const fullText = (title + ' ' + cleanSnippet).toLowerCase();\n  let category = d.feedDefaultCategory || 'tech';\n  if (iaRegex.test(fullText)) {\n    category = 'ia';\n  } else if (ecoRegex.test(fullText)) {\n    category = 'economie';\n  } else if (techRegex.test(fullText)) {\n    category = 'tech';\n  }\n\n  rawArticles.push({\n    titre: title,\n    source: d.feedSource || 'Source inconnue',\n    tier: d.feedTier || 2,\n    type: d.feedType || 'reportage',\n    date_iso: pubDate ? pubDate.toISOString() : new Date().toISOString(),\n    link: link,\n    categorie: category,\n    texte: cleanSnippet,\n    titleWords\n  });\n}\n\n// Calcul de couverture multi-sources (overlap >= 0.25)\nfor (const art of rawArticles) {\n  const otherSources = new Set([art.source]);\n  for (const other of rawArticles) {\n    if (other === art) continue;\n    if (titleSimilarity(art.titleWords, other.titleWords) >= 0.25) {\n      otherSources.add(other.source);\n    }\n  }\n  art.distinctSourcesCount = otherSources.size;\n}\n\n// Pré-classement : nombre de sources distinctes (desc), fraîcheur (desc), niveau (asc)\nrawArticles.sort((a, b) => {\n  if (b.distinctSourcesCount !== a.distinctSourcesCount) {\n    return b.distinctSourcesCount - a.distinctSourcesCount;\n  }\n  const dateDiff = new Date(b.date_iso).getTime() - new Date(a.date_iso).getTime();\n  if (dateDiff !== 0) return dateDiff;\n  return a.tier - b.tier;\n});\n\n// Application des quotas par catégorie\nconst normalizedArticles = [];\nconst catCounts = { ia: 0, economie: 0, tech: 0 };\nconst sourceCounts = {};\nlet idIdx = 1;\n\nfor (const art of rawArticles) {\n  const cat = art.categorie;\n  if ((catCounts[cat] || 0) < (quotas[cat] || 20) && normalizedArticles.length < maxArticles) {\n    catCounts[cat] = (catCounts[cat] || 0) + 1;\n    sourceCounts[art.source] = (sourceCounts[art.source] || 0) + 1;\n    normalizedArticles.push({\n      id: 'A' + String(idIdx++).padStart(3, '0'),\n      titre: art.titre,\n      source: art.source,\n      tier: art.tier,\n      type: art.type,\n      date_iso: art.date_iso,\n      link: art.link,\n      categorie: art.categorie,\n      texte: art.texte,\n      distinct_sources_count: art.distinctSourcesCount\n    });\n  }\n}\n\n// Détection des flux sans article retenu\nconst allFeedSources = [\n  'Google Research', 'OpenAI', 'NVIDIA Blog', 'Hugging Face Blog',\n  'BCE / ECB Press', 'Federal Reserve Press', 'BBC Business', 'France 24 Éco-Tech',\n  'DW Business', 'Le Monde Économie', 'The Guardian Business', 'MarketWatch',\n  'MIT Tech Review AI', 'TechCrunch AI', 'Ars Technica', 'The Verge'\n];\nconst zeroArticleFeeds = allFeedSources.filter(s => !sourceCounts[s]);\n\nreturn [{\n  json: {\n    articles: normalizedArticles,\n    total_retained: normalizedArticles.length,\n    stats: {\n      total_raw_collected: items.length,\n      filtered_older_than_window: filteredOldCount,\n      duplicates_removed: duplicatesCount,\n      already_sent_excluded: alreadySentCount,\n      counts_by_category: catCounts,\n      counts_by_source: sourceCounts,\n      feeds_with_zero_retained_articles: zeroArticleFeeds\n    }\n  }\n}];"
+      },
+      "id": "normaliser",
+      "name": "Normaliser",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1700,
+        750
+      ]
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config": {
+      "main": [
+        [
+          {
+            "node": "RSS Google Research",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS OpenAI",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS NVIDIA Blog",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS Hugging Face Blog",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS BCE / ECB Press",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS Federal Reserve Press",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS BBC Business",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS France 24 Éco-Tech",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS DW Business",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS Le Monde Économie",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS The Guardian Business",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS MarketWatch",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS MIT Tech Review AI",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS TechCrunch AI",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS Ars Technica",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS The Verge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Google Research": {
+      "main": [
+        [
+          {
+            "node": "Tag Google Research",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS OpenAI": {
+      "main": [
+        [
+          {
+            "node": "Tag OpenAI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS NVIDIA Blog": {
+      "main": [
+        [
+          {
+            "node": "Tag NVIDIA Blog",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Hugging Face Blog": {
+      "main": [
+        [
+          {
+            "node": "Tag Hugging Face Blog",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS BCE / ECB Press": {
+      "main": [
+        [
+          {
+            "node": "Tag BCE / ECB Press",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Federal Reserve Press": {
+      "main": [
+        [
+          {
+            "node": "Tag Federal Reserve Press",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS BBC Business": {
+      "main": [
+        [
+          {
+            "node": "Tag BBC Business",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS France 24 Éco-Tech": {
+      "main": [
+        [
+          {
+            "node": "Tag France 24 Éco-Tech",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS DW Business": {
+      "main": [
+        [
+          {
+            "node": "Tag DW Business",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Le Monde Économie": {
+      "main": [
+        [
+          {
+            "node": "Tag Le Monde Économie",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS The Guardian Business": {
+      "main": [
+        [
+          {
+            "node": "Tag The Guardian Business",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS MarketWatch": {
+      "main": [
+        [
+          {
+            "node": "Tag MarketWatch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS MIT Tech Review AI": {
+      "main": [
+        [
+          {
+            "node": "Tag MIT Tech Review AI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS TechCrunch AI": {
+      "main": [
+        [
+          {
+            "node": "Tag TechCrunch AI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Ars Technica": {
+      "main": [
+        [
+          {
+            "node": "Tag Ars Technica",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS The Verge": {
+      "main": [
+        [
+          {
+            "node": "Tag The Verge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tag Google Research": {
+      "main": [
+        [
+          {
+            "node": "Merge L1_1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tag OpenAI": {
+      "main": [
+        [
+          {
+            "node": "Merge L1_1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Tag NVIDIA Blog": {
+      "main": [
+        [
+          {
+            "node": "Merge L1_2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tag Hugging Face Blog": {
+      "main": [
+        [
+          {
+            "node": "Merge L1_2",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Tag BCE / ECB Press": {
+      "main": [
+        [
+          {
+            "node": "Merge L1_3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tag Federal Reserve Press": {
+      "main": [
+        [
+          {
+            "node": "Merge L1_3",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Tag BBC Business": {
+      "main": [
+        [
+          {
+            "node": "Merge L1_4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tag France 24 Éco-Tech": {
+      "main": [
+        [
+          {
+            "node": "Merge L1_4",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Tag DW Business": {
+      "main": [
+        [
+          {
+            "node": "Merge L1_5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tag Le Monde Économie": {
+      "main": [
+        [
+          {
+            "node": "Merge L1_5",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Tag The Guardian Business": {
+      "main": [
+        [
+          {
+            "node": "Merge L1_6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tag MarketWatch": {
+      "main": [
+        [
+          {
+            "node": "Merge L1_6",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Tag MIT Tech Review AI": {
+      "main": [
+        [
+          {
+            "node": "Merge L1_7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tag TechCrunch AI": {
+      "main": [
+        [
+          {
+            "node": "Merge L1_7",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Tag Ars Technica": {
+      "main": [
+        [
+          {
+            "node": "Merge L1_8",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tag The Verge": {
+      "main": [
+        [
+          {
+            "node": "Merge L1_8",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge L1_1": {
+      "main": [
+        [
+          {
+            "node": "Merge L2_1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge L1_2": {
+      "main": [
+        [
+          {
+            "node": "Merge L2_1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge L1_3": {
+      "main": [
+        [
+          {
+            "node": "Merge L2_2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge L1_4": {
+      "main": [
+        [
+          {
+            "node": "Merge L2_2",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge L1_5": {
+      "main": [
+        [
+          {
+            "node": "Merge L2_3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge L1_6": {
+      "main": [
+        [
+          {
+            "node": "Merge L2_3",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge L1_7": {
+      "main": [
+        [
+          {
+            "node": "Merge L2_4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge L1_8": {
+      "main": [
+        [
+          {
+            "node": "Merge L2_4",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge L2_1": {
+      "main": [
+        [
+          {
+            "node": "Merge L3_1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge L2_2": {
+      "main": [
+        [
+          {
+            "node": "Merge L3_1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge L2_3": {
+      "main": [
+        [
+          {
+            "node": "Merge L3_2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge L2_4": {
+      "main": [
+        [
+          {
+            "node": "Merge L3_2",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge L3_1": {
+      "main": [
+        [
+          {
+            "node": "Merge Final",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge L3_2": {
+      "main": [
+        [
+          {
+            "node": "Merge Final",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge Final": {
+      "main": [
+        [
+          {
+            "node": "Normaliser",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "timezone": "Africa/Algiers",
+    "executionOrder": "v1",
+    "saveManualExecutions": true
+  }
+}

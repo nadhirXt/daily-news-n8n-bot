@@ -1,0 +1,63 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "DailyNewsSummary",
+  "type": "object",
+  "properties": {
+    "date": {
+      "type": "string",
+      "description": "Date de la synthèse au format YYYY-MM-DD"
+    },
+    "categories": {
+      "type": "array",
+      "description": "Liste des catégories d'actualités",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "enum": ["IA", "Économie mondiale", "Technologie"]
+          },
+          "items": {
+            "type": "array",
+            "description": "Actualités sélectionnées pour cette catégorie",
+            "items": {
+              "type": "object",
+              "properties": {
+                "titre": {
+                  "type": "string",
+                  "description": "Titre concis et factuel en français"
+                },
+                "resume": {
+                  "type": "string",
+                  "description": "Synthèse factuelle en 2 phrases maximum (45 mots maximum)"
+                },
+                "article_ids": {
+                  "type": "array",
+                  "description": "Identifiants des articles sources utilisés (ex: ['A001', 'A004'])",
+                  "items": {
+                    "type": "string"
+                  },
+                  "minItems": 1
+                },
+                "preuve": {
+                  "type": "string",
+                  "description": "Extrait mot pour mot de 15 mots maximum présent textuellement dans l'un des articles sources cités"
+                },
+                "nature": {
+                  "type": "string",
+                  "enum": ["fait_rapporte", "annonce_entreprise", "analyse"]
+                }
+              },
+              "required": ["titre", "resume", "article_ids", "preuve", "nature"],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": ["name", "items"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": ["date", "categories"],
+  "additionalProperties": false
+}

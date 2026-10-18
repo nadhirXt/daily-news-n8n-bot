@@ -1,0 +1,39 @@
+# Dépendances Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environnement & Secrets
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+
+# Fichiers de tests locaux et runs
+tests/last_*
+tests/*.log
+*.log
+
+# Dossiers n8n locaux
+.n8n/
+
+# Système & OS
+.DS_Store
+Thumbs.db
+
+# IDE & Editeurs
+.vscode/
+.idea/
+.claude/
+.cursor/
+.gemini/
+*.swp
+*.swo
+
+# Antigravity / Agent runtime caches & tools
+.system_generated/
+.agents/
+graphify-out/
+skills-lock.json

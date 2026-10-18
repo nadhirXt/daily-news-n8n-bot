@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1080, height=1350, initial-scale=1.0">
+  <title>Daily News Instagram Card</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      width: 1080px;
+      height: 1350px;
+      margin: 0;
+      padding: 0;
+      background: #090d16;
+      color: #f1f5f9;
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    /* Ambient background glows */
+    .glow-top {
+      position: absolute;
+      top: -150px;
+      right: -100px;
+      width: 600px;
+      height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(56, 189, 248, 0.15) 0%, rgba(14, 165, 233, 0) 70%);
+      pointer-events: none;
+    }
+
+    .glow-bottom {
+      position: absolute;
+      bottom: -150px;
+      left: -100px;
+      width: 650px;
+      height: 650px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.18) 0%, rgba(79, 70, 229, 0) 70%);
+      pointer-events: none;
+    }
+
+    .card-container {
+      width: 100%;
+      height: 100%;
+      padding: 80px 70px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      z-index: 2;
+    }
+
+    /* Header */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 30px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .brand-logo {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #38bdf8 0%, #6366f1 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: 24px;
+      color: #ffffff;
+      box-shadow: 0 8px 24px rgba(56, 189, 248, 0.25);
+    }
+
+    .brand-name {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: #ffffff;
+    }
+
+    .date-badge {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 10px 20px;
+      border-radius: 30px;
+      font-size: 18px;
+      font-weight: 600;
+      color: #94a3b8;
+      letter-spacing: 0.02em;
+    }
+
+    /* Main Content */
+    .main-body {
+      display: flex;
+      flex-direction: column;
+      gap: 36px;
+      margin-top: auto;
+      margin-bottom: auto;
+    }
+
+    .category-tag {
+      align-self: flex-start;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 22px;
+      border-radius: 40px;
+      font-size: 20px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      color: #38bdf8;
+    }
+
+    .category-tag.eco {
+      background: rgba(16, 185, 129, 0.12);
+      border-color: rgba(16, 185, 129, 0.3);
+      color: #34d399;
+    }
+
+    .category-tag.tech {
+      background: rgba(168, 85, 247, 0.12);
+      border-color: rgba(168, 85, 247, 0.3);
+      color: #c084fc;
+    }
+
+    .article-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 52px;
+      font-weight: 700;
+      line-height: 1.22;
+      letter-spacing: -0.03em;
+      color: #ffffff;
+    }
+
+    .resume-box {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      border-radius: 24px;
+      padding: 38px 42px;
+      position: relative;
+      backdrop-filter: blur(12px);
+    }
+
+    .resume-text {
+      font-size: 26px;
+      line-height: 1.6;
+      color: #cbd5e1;
+      font-weight: 400;
+    }
+
+    .impact-box {
+      margin-top: 24px;
+      padding-top: 24px;
+      border-top: 1px dashed rgba(255, 255, 255, 0.1);
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+    }
+
+    .impact-icon {
+      font-size: 24px;
+      line-height: 1.2;
+    }
+
+    .impact-text {
+      font-size: 22px;
+      line-height: 1.5;
+      color: #38bdf8;
+      font-weight: 600;
+    }
+
+    /* Footer */
+    .footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 30px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .sources-list {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .sources-label {
+      font-size: 18px;
+      color: #64748b;
+      font-weight: 600;
+    }
+
+    .source-chip {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 8px 18px;
+      border-radius: 20px;
+      font-size: 17px;
+      color: #94a3b8;
+      font-weight: 600;
+    }
+
+    .slide-indicator {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 22px;
+      font-weight: 700;
+      color: #64748b;
+      background: rgba(255, 255, 255, 0.04);
+      padding: 10px 22px;
+      border-radius: 30px;
+      letter-spacing: 0.08em;
+    }
+
+    /* Mode Couverture (Cover Slide) */
+    .is-cover .main-body {
+      text-align: center;
+      align-items: center;
+      gap: 40px;
+    }
+
+    .is-cover .cover-badge {
+      background: linear-gradient(135deg, rgba(56, 189, 248, 0.2) 0%, rgba(99, 102, 241, 0.2) 100%);
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      padding: 12px 30px;
+      border-radius: 50px;
+      font-size: 20px;
+      font-weight: 700;
+      color: #38bdf8;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .is-cover .cover-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 72px;
+      font-weight: 800;
+      line-height: 1.15;
+      letter-spacing: -0.04em;
+      color: #ffffff;
+      max-width: 900px;
+    }
+
+    .is-cover .cover-subtitle {
+      font-size: 28px;
+      line-height: 1.5;
+      color: #94a3b8;
+      max-width: 800px;
+    }
+
+    .is-cover .topics-preview {
+      display: flex;
+      gap: 18px;
+      margin-top: 10px;
+    }
+
+    .is-cover .topic-pill {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 14px 26px;
+      border-radius: 30px;
+      font-size: 20px;
+      font-weight: 600;
+      color: #cbd5e1;
+    }
+  </style>
+</head>
+<body>
+  <div class="glow-top"></div>
+  <div class="glow-bottom"></div>
+
+  <div class="card-container" id="cardContent">
+    <!-- Header -->
+    <header class="header">
+      <div class="brand">
+        <div class="brand-logo">N</div>
+        <span class="brand-name">L'ESSENTIEL DU JOUR</span>
+      </div>
+      <div class="date-badge" id="cardDate">17 OCTOBRE 2026</div>
+    </header>
+
+    <!-- Main Content Slide (Par défaut) -->
+    <main class="main-body" id="slideBody">
+      <div class="category-tag" id="categoryTag">🌍 Monde & Politique</div>
+      <h1 class="article-title" id="articleTitle">Sommet mondial sur l'énergie propre : accord historique signé à Genève</h1>
+      <div class="resume-box">
+        <p class="resume-text" id="resumeText">
+          Les représentants de 85 pays ont finalisé un cadre contraignant de réduction des subventions aux combustibles fossiles d'ici 2030. L'initiative prévoit également un mécanisme conjoint de financement de 120 milliards d'euros pour les infrastructures de transition.
+        </p>
+        <div class="impact-box">
+          <span class="impact-icon">💡</span>
+          <p class="impact-text" id="impactText">
+            Ce traité marque la première fois qu'un calendrier financier contraignant est accepté par les principales puissances exportatrices.
+          </p>
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="sources-list" id="sourcesList">
+        <span class="sources-label">Sources vérifiées :</span>
+        <span class="source-chip">BBC World</span>
+        <span class="source-chip">France 24</span>
+      </div>
+      <div class="slide-indicator" id="slideIndicator">02 / 05</div>
+    </footer>
+  </div>
+
+  <script>
+    // Permet d'injecter dynamiquement les données depuis un script Puppeteer / Playwright
+    function setCardData(data) {
+      if (data.isCover) {
+        document.body.classList.add('is-cover');
+        document.getElementById('slideBody').innerHTML = `
+          <div class="cover-badge">Synthèse Quotidienne</div>
+          <h1 class="cover-title">${data.title || "L'Actualité Mondiale en 5 Minutes"}</h1>
+          <p class="cover-subtitle">${data.subtitle || "Les faits majeurs en politique, économie et technologie résumés sans parti pris."}</p>
+          <div class="topics-preview">
+            <span class="topic-pill">🌍 Géopolitique</span>
+            <span class="topic-pill">💰 Marchés & Éco</span>
+            <span class="topic-pill">🔬 Tech & IA</span>
+          </div>
+        `;
+        document.getElementById('sourcesList').innerHTML = `<span class="sources-label">Synthèse neutre et multi-sources</span>`;
+      } else {
+        document.body.classList.remove('is-cover');
+        if (data.category) {
+          const tag = document.getElementById('categoryTag');
+          tag.textContent = data.category;
+          tag.className = 'category-tag';
+          if (data.category.includes('Éco')) tag.classList.add('eco');
+          if (data.category.includes('Tech')) tag.classList.add('tech');
+        }
+        if (data.title) document.getElementById('articleTitle').textContent = data.title;
+        if (data.resume) document.getElementById('resumeText').textContent = data.resume;
+        if (data.pourquoi_important) document.getElementById('impactText').textContent = data.pourquoi_important;
+        if (data.sources && Array.isArray(data.sources)) {
+          const chips = data.sources.map(s => `<span class="source-chip">${s}</span>`).join('');
+          document.getElementById('sourcesList').innerHTML = `<span class="sources-label">Sources vérifiées :</span>` + chips;
+        }
+      }
+
+      if (data.date) document.getElementById('cardDate').textContent = data.date;
+      if (data.slideNumber && data.totalSlides) {
+        document.getElementById('slideIndicator').textContent = 
+          String(data.slideNumber).padStart(2, '0') + ' / ' + String(data.totalSlides).padStart(2, '0');
+      }
+    }
+
+    // Support des paramètres d'URL pour prévisualisation locale dans le navigateur
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('mode') === 'cover') {
+      setCardData({
+        isCover: true,
+        date: urlParams.get('date') || '17 OCTOBRE 2026',
+        slideNumber: 1,
+        totalSlides: 5
+      });
+    }
+  </script>
+</body>
+</html>

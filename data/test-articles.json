@@ -1,0 +1,68 @@
+[
+  {
+    "id": "art_1",
+    "title": "Accord international sur la protection des corridors maritimes commerciaux",
+    "description": "Une coalition de vingt-deux nations maritimes a ratifié aujourd'hui à Singapour un protocole conjoint renforçant la sécurité des détroits stratégiques. Le texte établit un centre de coordination permanent et des patrouilles coordonnées dès le mois prochain.",
+    "source": "BBC World",
+    "category": "Monde & Politique",
+    "link": "https://www.bbc.com/news/world-asia-689001",
+    "pubDate": "2026-10-17T06:00:00.000Z",
+    "isMultiSource": true,
+    "sourcesCount": 2
+  },
+  {
+    "id": "art_2",
+    "title": "Sécurité maritime : vingt-deux pays signent le traité de Singapour",
+    "description": "Le protocole de Singapour sur la libre circulation maritime a été signé ce matin par les représentants des principales flottes marchandes. Le dispositif prévoit une surveillance satellitaire partagée pour prévenir les perturbations commerciales.",
+    "source": "France 24",
+    "category": "Monde & Politique",
+    "link": "https://www.france24.com/fr/asie-pacifique/20261017-accord-maritime-singapour",
+    "pubDate": "2026-10-17T06:30:00.000Z",
+    "isMultiSource": true,
+    "sourcesCount": 2
+  },
+  {
+    "id": "art_3",
+    "title": "Les banques centrales européennes harmonisent leurs réserves d'urgence",
+    "description": "Le directoire financier commun a validé un mécanisme de liquidité transfrontalière doté de 45 milliards d'euros. Cette mesure vise à amortir les variations soudaines des taux interbancaires en période de volatilité.",
+    "source": "MarketWatch",
+    "category": "Économie",
+    "link": "https://www.marketwatch.com/story/european-central-banks-liquidity-pool-2026-10-17",
+    "pubDate": "2026-10-17T05:45:00.000Z",
+    "isMultiSource": true,
+    "sourcesCount": 2
+  },
+  {
+    "id": "art_4",
+    "title": "Zone euro : création d'un fonds de liquidité de 45 milliards d'euros",
+    "description": "Les gouverneurs ont approuvé la mise en place d'un coussin de stabilité commun pour prévenir les tensions de trésorerie sur le marché obligataire. Le déploiement opérationnel débutera au premier trimestre.",
+    "source": "Le Monde",
+    "category": "Économie",
+    "link": "https://www.lemonde.fr/economie/article/2026/10/17/fonds-stabilite-zone-euro_689002.html",
+    "pubDate": "2026-10-17T06:15:00.000Z",
+    "isMultiSource": true,
+    "sourcesCount": 2
+  },
+  {
+    "id": "art_5",
+    "title": "Nouvelle architecture de processeurs photoniques pour centres de calcul IA",
+    "description": "Des chercheurs du consortium technologique ont présenté une puce optique capable de traiter les matrices d'inférence avec une consommation électrique réduite de 60%. Les premiers tests d'intégration en grappe industrielle ont été validés.",
+    "source": "Ars Technica",
+    "category": "Tech & Science",
+    "link": "https://arstechnica.com/science/2026/10/photonic-chip-ai-inference-milestone/",
+    "pubDate": "2026-10-17T04:20:00.000Z",
+    "isMultiSource": true,
+    "sourcesCount": 2
+  },
+  {
+    "id": "art_6",
+    "title": "Des puces optiques diminuent de 60% la consommation énergétique de l'IA",
+    "description": "Le prototype présenté à Boston remplace les interconnexions en cuivre par des guides d'ondes silicium. Cette percée technique promet de désengorger les limites thermiques des grands centres de données.",
+    "source": "MIT Technology Review",
+    "category": "Tech & Science",
+    "link": "https://www.technologyreview.com/2026/10/17/photonic-chips-energy-efficiency/",
+    "pubDate": "2026-10-17T05:10:00.000Z",
+    "isMultiSource": true,
+    "sourcesCount": 2
+  }
+]

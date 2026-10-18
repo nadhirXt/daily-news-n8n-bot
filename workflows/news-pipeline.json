@@ -1,0 +1,586 @@
+{
+  "name": "News – Collecte & Synthèse",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 7 * * *"
+            }
+          ]
+        }
+      },
+      "id": "schedule_trigger",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -200,
+        750
+      ],
+      "notes": "Heure quotidienne d'exécution (07:00 Africa/Algiers). Unique endroit de réglage de l'heure."
+    },
+    {
+      "parameters": {},
+      "id": "manual_trigger",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -200,
+        600
+      ],
+      "notes": "Déclenchement manuel pour tests et exécution à la demande."
+    },
+    {
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "news-pipeline-test",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "webhook_test",
+      "name": "Webhook Test",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -200,
+        450
+      ],
+      "webhookId": "news-pipeline-test"
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message",
+          "my_chat_member",
+          "callback_query"
+        ],
+        "additionalFields": {}
+      },
+      "id": "telegram_bot_trigger",
+      "name": "Telegram Bot Trigger",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -200,
+        950
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "urLGI1jqIbAUO4AB",
+          "name": "Telegram account 3"
+        }
+      },
+      "notes": "Déclencheur Telegram direct."
+    },
+    {
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "const input = $input.first().json;\nconst staticData = $getWorkflowStaticData('global');\nif (!staticData.subscribers) staticData.subscribers = {};\n\nlet msg = input.message || input.callback_query?.message || {};\nlet from = input.message?.from || input.callback_query?.from || input.my_chat_member?.from || {};\nlet text = (input.message?.text || input.callback_query?.data || '').trim();\nlet chatId = msg.chat?.id || from.id;\n\nif (!chatId) return [];\n\nconst firstName = from.first_name || 'Abonné';\nconst username = from.username ? '@' + from.username : '';\n\nif (input.my_chat_member) {\n  const newStatus = input.my_chat_member.new_chat_member?.status;\n  if (newStatus === 'kicked' || newStatus === 'left') {\n    delete staticData.subscribers[chatId];\n    return [];\n  }\n}\n\nif (text === '/stop' || text.toLowerCase().includes('desabonner') || text.toLowerCase().includes('désabonner')) {\n  delete staticData.subscribers[chatId];\n  return [{\n    json: {\n      chatId: chatId,\n      text: '🛑 <b>Désabonnement confirmé.</b>\\n\\nVous ne recevrez plus le briefing quotidien du matin.\\nPour vous réabonner à tout moment, envoyez simplement /start.',\n      has_buttons: false,\n      is_bot_reply: true\n    }\n  }];\n}\n\nif (text.startsWith('/filter_') || ['ia', 'eco', 'tech'].includes(text.toLowerCase())) {\n  let catKey = 'ia';\n  let catName = 'Intelligence Artificielle';\n  if (text.includes('eco') || text.includes('éco')) {\n    catKey = 'eco';\n    catName = 'Économie Mondiale';\n  } else if (text.includes('tech')) {\n    catKey = 'tech';\n    catName = 'Technologie';\n  }\n\n  const categoryData = (staticData.categorySummaries && staticData.categorySummaries[catKey]) || null;\n  const today = staticData.latestSummaryDate || new Date().toISOString().slice(0, 10);\n\n  if (categoryData) {\n    return [{\n      json: {\n        chatId: chatId,\n        text: '📌 <b>FOCUS ' + catName.toUpperCase() + '</b> <code>(' + today + ')</code>\\n\\n' + categoryData,\n        has_buttons: false,\n        is_bot_reply: true\n      }\n    }];\n  } else {\n    return [{\n      json: {\n        chatId: chatId,\n        text: 'ℹ️ <i>Aucun article spécifique disponible aujourd\\'hui pour la catégorie ' + catName + '.</i>',\n        has_buttons: false,\n        is_bot_reply: true\n      }\n    }];\n  }\n}\n\nif (text === '/stats' || text.toLowerCase().includes('stats')) {\n  const subCount = Object.keys(staticData.subscribers || {}).length;\n  const today = staticData.latestSummaryDate || 'Aucun';\n  const sentUrlsCount = Object.keys(staticData.sentUrls || {}).length;\n\n  const statsMsg = '📊 <b>TABLEAU DE BORD DU BOT</b>\\n\\n' +\n    '• <b>Abonnés actifs :</b> <code>' + subCount + '</code>\\n' +\n    '• <b>Dernier briefing généré :</b> <code>' + today + '</code>\\n' +\n    '• <b>Articles en mémoire (14j anti-doublon) :</b> <code>' + sentUrlsCount + '</code>\\n' +\n    '• <b>Cadence :</b> Quotidienne à 07:00 (Africa/Algiers)\\n\\n' +\n    '🤖 <i>Pipeline opérationnel sans canal intermédiaire.</i>';\n\n  return [{\n    json: {\n      chatId: chatId,\n      text: statsMsg,\n      has_buttons: false,\n      is_bot_reply: true\n    }\n  }];\n}\n\nstaticData.subscribers[chatId] = {\n  chatId: chatId,\n  firstName: firstName,\n  username: username,\n  subscribedAt: new Date().toISOString()\n};\n\nconst latest = staticData.latestSummary || [];\nconst latestDate = staticData.latestSummaryDate || new Date().toISOString().slice(0, 10);\n\nconst lowerText = text.toLowerCase();\nif (lowerText.includes('actualit') || lowerText.includes('news')) {\n  if (latest && latest.length > 0) {\n    return latest.map((partText) => ({\n      json: {\n        chatId: chatId,\n        text: partText,\n        has_buttons: false,\n        is_bot_reply: true\n      }\n    }));\n  }\n}\n\nconst menuCard = '⚡ <b>Bonjour ' + firstName + ' !</b>\\n\\n' +\n  '<blockquote>🤖 <b>Bot Actualités Quotidiennes</b>\\n' +\n  'Chaque matin à <code>07:00</code>, recevez votre briefing complet directement ici.\\n' +\n  '✅ <b>Abonnement actif</b></blockquote>\\n\\n' +\n  '🎯 <b>Commandes disponibles :</b>\\n' +\n  '<i>Cliquez sur une commande ci-dessous ou utilisez les boutons :</i>\\n\\n' +\n  '• /actualites — 📰 <b>Voir le briefing du jour (' + latestDate + ')</b>\\n' +\n  '• /stats — 📊 <b>Tableau de bord & Abonnés</b>\\n' +\n  '• /filter_ia — 🤖 <b>Focus Intelligence Artificielle</b>\\n' +\n  '• /filter_eco — 🌍 <b>Focus Économie Mondiale</b>\\n' +\n  '• /filter_tech — 💻 <b>Focus Technologie</b>\\n' +\n  '• /stop — 🛑 <b>Se désabonner du bot</b>';\n\nreturn [{\n  json: {\n    chatId: chatId,\n    text: menuCard,\n    has_buttons: true,\n    is_bot_reply: true\n  }\n}];\n"
+      },
+      "id": "bot_handler",
+      "name": "Bot Router & Handler",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        40,
+        950
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.chatId }}",
+        "text": "={{ $json.text }}",
+        "replyMarkup": "={{ $json.has_buttons ? 'inlineKeyboard' : 'none' }}",
+        "inlineKeyboard": {
+          "rows": [
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "📰 Actualités",
+                    "additionalFields": {
+                      "callback_data": "/actualites"
+                    }
+                  },
+                  {
+                    "text": "📊 Stats",
+                    "additionalFields": {
+                      "callback_data": "/stats"
+                    }
+                  },
+                  {
+                    "text": "🛑 Se désabonner",
+                    "additionalFields": {
+                      "callback_data": "/stop"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "🤖 IA",
+                    "additionalFields": {
+                      "callback_data": "/filter_ia"
+                    }
+                  },
+                  {
+                    "text": "🌍 Éco",
+                    "additionalFields": {
+                      "callback_data": "/filter_eco"
+                    }
+                  },
+                  {
+                    "text": "💻 Tech",
+                    "additionalFields": {
+                      "callback_data": "/filter_tech"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "🏠 Menu",
+                    "additionalFields": {
+                      "callback_data": "/start"
+                    }
+                  },
+                  {
+                    "text": "📤 Partager",
+                    "additionalFields": {
+                      "url": "https://t.me/share/url?url=https://t.me/NewsRecapBot&text=D%C3%A9couvre%20ce%20bot%20qui%20r%C3%A9sume%20chaque%20matin%20l%27actualit%C3%A9%20IA,%20%C3%89co%20et%20Tech%20en%20priv%C3%A9%20!"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "additionalFields": {
+          "parse_mode": "HTML",
+          "disable_web_page_preview": true,
+          "appendAttribution": false
+        }
+      },
+      "credentials": {
+        "telegramApi": {
+          "id": "urLGI1jqIbAUO4AB",
+          "name": "Telegram account 3"
+        }
+      },
+      "id": "send_bot_response",
+      "name": "Send Bot Response",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        280,
+        950
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c1",
+              "name": "window_hours",
+              "value": 24,
+              "type": "number"
+            },
+            {
+              "id": "c2",
+              "name": "max_articles",
+              "value": 60,
+              "type": "number"
+            },
+            {
+              "id": "c3",
+              "name": "quota_ia",
+              "value": 25,
+              "type": "number"
+            },
+            {
+              "id": "c4",
+              "name": "quota_economie",
+              "value": 20,
+              "type": "number"
+            },
+            {
+              "id": "c5",
+              "name": "quota_technologie",
+              "value": 15,
+              "type": "number"
+            },
+            {
+              "id": "c6",
+              "name": "admin_chat_id",
+              "value": "YOUR_ADMIN_CHAT_ID",
+              "type": "string"
+            },
+            {
+              "id": "c7",
+              "name": "telegram_chat_id",
+              "value": "YOUR_TELEGRAM_CHAT_ID",
+              "type": "string"
+            },
+            {
+              "id": "c8",
+              "name": "test_mode",
+              "value": false,
+              "type": "boolean"
+            }
+          ]
+        }
+      },
+      "id": "config_node",
+      "name": "Config",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        40,
+        600
+      ]
+    },
+    {
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "return [\n  {\n    \"id\": \"google_research\",\n    \"name\": \"Google Research\",\n    \"tier\": 1,\n    \"type\": \"annonce_entreprise\",\n    \"defaultCat\": \"ia\",\n    \"url\": \"https://research.google/blog/rss/\"\n  },\n  {\n    \"id\": \"openai\",\n    \"name\": \"OpenAI\",\n    \"tier\": 1,\n    \"type\": \"annonce_entreprise\",\n    \"defaultCat\": \"ia\",\n    \"url\": \"https://openai.com/news/rss.xml\"\n  },\n  {\n    \"id\": \"nvidia\",\n    \"name\": \"NVIDIA Blog\",\n    \"tier\": 1,\n    \"type\": \"annonce_entreprise\",\n    \"defaultCat\": \"ia\",\n    \"url\": \"https://blogs.nvidia.com/feed/\"\n  },\n  {\n    \"id\": \"huggingface\",\n    \"name\": \"Hugging Face Blog\",\n    \"tier\": 1,\n    \"type\": \"annonce_entreprise\",\n    \"defaultCat\": \"ia\",\n    \"url\": \"https://huggingface.co/blog/feed.xml\"\n  },\n  {\n    \"id\": \"bce\",\n    \"name\": \"BCE / ECB Press\",\n    \"tier\": 1,\n    \"type\": \"donnees_officielles\",\n    \"defaultCat\": \"economie\",\n    \"url\": \"https://www.ecb.europa.eu/rss/press.html\"\n  },\n  {\n    \"id\": \"fed\",\n    \"name\": \"Federal Reserve Press\",\n    \"tier\": 1,\n    \"type\": \"donnees_officielles\",\n    \"defaultCat\": \"economie\",\n    \"url\": \"https://www.federalreserve.gov/feeds/press_all.xml\"\n  },\n  {\n    \"id\": \"bbc_business\",\n    \"name\": \"BBC Business\",\n    \"tier\": 2,\n    \"type\": \"reportage\",\n    \"defaultCat\": \"economie\",\n    \"url\": \"https://feeds.bbci.co.uk/news/business/rss.xml\"\n  },\n  {\n    \"id\": \"france24_eco\",\n    \"name\": \"France 24 Éco-Tech\",\n    \"tier\": 2,\n    \"type\": \"reportage\",\n    \"defaultCat\": \"economie\",\n    \"url\": \"https://www.france24.com/fr/%C3%A9co-tech/rss\"\n  },\n  {\n    \"id\": \"dw_business\",\n    \"name\": \"DW Business\",\n    \"tier\": 2,\n    \"type\": \"reportage\",\n    \"defaultCat\": \"economie\",\n    \"url\": \"https://rss.dw.com/rdf/rss-en-bus\"\n  },\n  {\n    \"id\": \"lemonde_eco\",\n    \"name\": \"Le Monde Économie\",\n    \"tier\": 2,\n    \"type\": \"reportage\",\n    \"defaultCat\": \"economie\",\n    \"url\": \"https://www.lemonde.fr/economie/rss_full.xml\"\n  },\n  {\n    \"id\": \"guardian_business\",\n    \"name\": \"The Guardian Business\",\n    \"tier\": 2,\n    \"type\": \"reportage\",\n    \"defaultCat\": \"economie\",\n    \"url\": \"https://www.theguardian.com/uk/business/rss\"\n  },\n  {\n    \"id\": \"marketwatch\",\n    \"name\": \"MarketWatch\",\n    \"tier\": 2,\n    \"type\": \"reportage\",\n    \"defaultCat\": \"economie\",\n    \"url\": \"https://feeds.content.dowjones.io/public/rss/mw_topstories\"\n  },\n  {\n    \"id\": \"mit_tech_review\",\n    \"name\": \"MIT Tech Review AI\",\n    \"tier\": 3,\n    \"type\": \"reportage\",\n    \"defaultCat\": \"ia\",\n    \"url\": \"https://www.technologyreview.com/topic/artificial-intelligence/feed/\"\n  },\n  {\n    \"id\": \"techcrunch_ai\",\n    \"name\": \"TechCrunch AI\",\n    \"tier\": 3,\n    \"type\": \"reportage\",\n    \"defaultCat\": \"ia\",\n    \"url\": \"https://techcrunch.com/category/artificial-intelligence/feed/\"\n  },\n  {\n    \"id\": \"arstechnica\",\n    \"name\": \"Ars Technica\",\n    \"tier\": 3,\n    \"type\": \"reportage\",\n    \"defaultCat\": \"tech\",\n    \"url\": \"https://feeds.arstechnica.com/arstechnica/index\"\n  },\n  {\n    \"id\": \"theverge\",\n    \"name\": \"The Verge\",\n    \"tier\": 3,\n    \"type\": \"reportage\",\n    \"defaultCat\": \"tech\",\n    \"url\": \"https://www.theverge.com/rss/index.xml\"\n  }\n].map(f => ({ json: f }));"
+      },
+      "id": "feed_list",
+      "name": "Liste Flux RSS",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        280,
+        600
+      ],
+      "notes": "Définition des 16 sources avec métadonnées (tier, catégorie, type)."
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.url }}"
+      },
+      "id": "rss_read_batch",
+      "name": "Lecture RSS",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        520,
+        600
+      ],
+      "onError": "continueRegularOutput",
+      "notes": "Collecte automatique de tous les flux en parallèle."
+    },
+    {
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "const items = $input.all();\nconst config = $('Config').first().json || {};\nconst windowHours = config.window_hours || 24;\nconst maxArticles = config.max_articles || 60;\nconst quotas = {\n  ia: config.quota_ia || 25,\n  economie: config.quota_economie || 20,\n  tech: config.quota_tech || 15\n};\n\nconst now = Date.now();\nconst windowMs = windowHours * 3600 * 1000;\nconst retentionMs = 14 * 24 * 3600 * 1000;\n\nconst staticData = $getWorkflowStaticData('global');\nif (!staticData.sentUrls) staticData.sentUrls = {};\n\nfor (const [url, timestamp] of Object.entries(staticData.sentUrls)) {\n  if (now - timestamp > retentionMs) {\n    delete staticData.sentUrls[url];\n  }\n}\n\nfunction cleanUrl(raw) {\n  if (!raw) return '';\n  try {\n    const u = new URL(raw.trim());\n    const trackingParams = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'ref', 'source', 'fbclid', 'gclid'];\n    trackingParams.forEach(p => u.searchParams.delete(p));\n    return u.toString();\n  } catch (e) {\n    return raw.trim().split('?')[0];\n  }\n}\n\nfunction normalizeTitle(t) {\n  return (t || '').toLowerCase()\n    .normalize('NFD').replace(/[\\u0300-\\u036f]/g, '')\n    .replace(/[^a-z0-9]/g, ' ')\n    .split(/\\s+/)\n    .filter(w => w.length > 2);\n}\n\nfunction titleSimilarity(wordsA, wordsB) {\n  if (!wordsA.length || !wordsB.length) return 0;\n  const setA = new Set(wordsA);\n  const setB = new Set(wordsB);\n  let common = 0;\n  for (const w of setA) {\n    if (setB.has(w)) common++;\n  }\n  const union = new Set([...setA, ...setB]).size;\n  return union === 0 ? 0 : common / union;\n}\n\nconst seenUrls = new Set();\nconst seenTitles = [];\nlet duplicatesCount = 0;\nlet alreadySentCount = 0;\nlet filteredOldCount = 0;\nconst rawArticles = [];\n\nconst iaRegex = /\\b(ai|artificial intelligence|intelligence artificielle|llm|llms|gpt|gemini|openai|anthropic|claude|deepmind|copilot|deep learning|machine learning|neural|gpu|gpus|nvidia|hugging face|mistral|generative ai|genai|agent|agents)\\b/i;\nconst ecoRegex = /\\b(inflation|taux|banque centrale|bce|fed|federal reserve|fmi|imf|pib|gdp|croissance|recession|marche|marches|bourse|actions|obligations|economie|economy|dette|deficit|chomage|employment|tarifs|commerce|trade|oil|petrole)\\b/i;\nconst techRegex = /\\b(tech|technologie|technology|cyber|cybersecurite|software|logiciel|apple|microsoft|google|amazon|meta|hardware|semiconducteur|chips|cloud|quantum|robotique|robotics)\\b/i;\n\nfor (const item of items) {\n  const d = item.json;\n  let feedMeta = {};\n  try {\n    feedMeta = item.pairedItem ? $('Liste Flux RSS').itemMatching(item.pairedItem.item)?.json : {};\n  } catch (e) {}\n  const feedSource = d.feedSource || feedMeta?.name || 'Source inconnue';\n  const feedTier = d.feedTier || feedMeta?.tier || 2;\n  const feedType = d.feedType || feedMeta?.type || 'reportage';\n  const feedDefaultCategory = d.feedDefaultCategory || feedMeta?.defaultCat || 'tech';\n\n  const title = (d.title || '').trim();\n  const rawLink = d.link || d.guid || '';\n  const link = cleanUrl(rawLink);\n\n  if (!title || !link) continue;\n\n  if (staticData.sentUrls[link]) {\n    alreadySentCount++;\n    continue;\n  }\n\n  if (seenUrls.has(link)) {\n    duplicatesCount++;\n    continue;\n  }\n\n  const titleWords = normalizeTitle(title);\n  let isDupTitle = false;\n  for (const seen of seenTitles) {\n    if (titleSimilarity(titleWords, seen.words) >= 0.60) {\n      isDupTitle = true;\n      seen.sources.add(feedSource);\n      duplicatesCount++;\n      break;\n    }\n  }\n  if (isDupTitle) continue;\n\n  seenUrls.add(link);\n  seenTitles.push({ words: titleWords, sources: new Set([feedSource]), title });\n\n  let pubDate = null;\n  if (d.isoDate) pubDate = new Date(d.isoDate);\n  else if (d.pubDate) pubDate = new Date(d.pubDate);\n\n  if (pubDate && !isNaN(pubDate.getTime())) {\n    if (now - pubDate.getTime() > windowMs) {\n      filteredOldCount++;\n      continue;\n    }\n  }\n\n  const rawSnippet = d.contentSnippet || d.content || d.summary || title;\n  const cleanSnippet = rawSnippet.replace(/<[^>]*>?/gm, ' ').replace(/\\s+/g, ' ').trim().slice(0, 1200);\n\n  const fullText = (title + ' ' + cleanSnippet).toLowerCase();\n  let category = feedDefaultCategory || 'tech';\n  if (iaRegex.test(fullText)) {\n    category = 'ia';\n  } else if (ecoRegex.test(fullText)) {\n    category = 'economie';\n  } else if (techRegex.test(fullText)) {\n    category = 'tech';\n  }\n\n  rawArticles.push({\n    titre: title,\n    source: feedSource,\n    tier: feedTier,\n    type: feedType,\n    date_iso: pubDate ? pubDate.toISOString() : new Date().toISOString(),\n    link: link,\n    categorie: category,\n    texte: cleanSnippet,\n    titleWords\n  });\n}\n\nfunction selectQuotas(articles, qIa, qEco, qTech, totalMax) {\n  const byCat = { ia: [], economie: [], tech: [] };\n  articles.forEach(a => {\n    if (byCat[a.categorie]) byCat[a.categorie].push(a);\n    else byCat.tech.push(a);\n  });\n\n  const sortFn = (a, b) => {\n    if (a.tier !== b.tier) return a.tier - b.tier;\n    return new Date(b.date_iso).getTime() - new Date(a.date_iso).getTime();\n  };\n\n  byCat.ia.sort(sortFn);\n  byCat.economie.sort(sortFn);\n  byCat.tech.sort(sortFn);\n\n  const selectedIa = byCat.ia.slice(0, qIa);\n  const selectedEco = byCat.economie.slice(0, qEco);\n  const selectedTech = byCat.tech.slice(0, qTech);\n\n  let combined = [...selectedIa, ...selectedEco, ...selectedTech];\n  if (combined.length > totalMax) {\n    combined.sort(sortFn);\n    combined = combined.slice(0, totalMax);\n  }\n\n  return {\n    articles: combined,\n    counts: {\n      ia: selectedIa.length,\n      economie: selectedEco.length,\n      tech: selectedTech.length,\n      total: combined.length\n    }\n  };\n}\n\nconst selection = selectQuotas(rawArticles, quotas.ia, quotas.economie, quotas.tech, maxArticles);\n\nreturn [{\n  json: {\n    articles: selection.articles,\n    stats: {\n      total_brut: items.length,\n      deja_envoyes_14j: alreadySentCount,\n      doublons_detectes: duplicatesCount,\n      hors_fenetre_24h: filteredOldCount,\n      apres_filtrage: rawArticles.length,\n      selection_finale: selection.counts\n    }\n  }\n}];\n"
+      },
+      "id": "normaliser",
+      "name": "Normaliser",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        760,
+        600
+      ]
+    },
+    {
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "const input = $input.first().json;\nconst articles = input.articles || [];\nconst systemPrompt = \"# Prompt Système — Synthèse Éditoriale d'Actualités (Anti-Hallucination)\\n\\nTu es un journaliste et rédacteur en chef senior, spécialisé dans l'information économique, technologique et l'intelligence artificielle. Ton rôle est de produire une synthèse quotidienne objective, concise et rigoureusement vérifiable à partir d'un ensemble d'articles bruts fournis.\\n\\n## Principes Directeurs et Règles Déontologiques\\n\\n### 1. Neutralité Stricte & Objectivité\\n- Adopte un ton journalistique neutre, sobre et factuel.\\n- Proscription absolue de tout superlatif, adjectif émotionnel, promotionnel ou partisan (ex: « révolutionnaire », « impressionnant », « sans précédent », « inquiétant », « fantastique »).\\n- Ne fais aucune conjecture, extrapolation ou prédiction non formulée dans les sources.\\n\\n### 2. Distinction des Natures d'Information\\nPour chaque actualité, tu dois qualifier rigoureusement sa `nature` :\\n- `annonce_entreprise` : Déclarations, lancements de produits, promesses ou affirmations émises par une entreprise.\\n  * Règle absolue : Une annonce d'entreprise doit TOUJOURS être rédigée comme une déclaration (« OpenAI annonce que... », « Selon Google, le modèle... », « NVIDIA présente sa puce... ») et JAMAIS comme un fait universellement établi.\\n- `donnees_officielles` : Publications d'institutions publiques ou banques centrales (BCE, Réserve Fédérale, ministères).\\n- `fait_rapporte` : Événements vérifiés ou constatés par des journalistes indépendants.\\n- `analyse` : Décryptage ou étude menée par des tiers.\\n\\n### 3. Factualité & Zéro Hallucination\\n- Tu travailles en **système clos** : utilise EXCLUSIVEMENT les faits, noms et données présents dans les articles fournis sous forme d'identifiants (`A001`, `A002`, ...).\\n- **CONTRÔLE STRICT DES CHIFFRES** : N'invente aucun chiffre, montant, pourcentage ou date. Tout nombre mentionné dans ton titre ou résumé doit exister textuellement dans les articles cités. Si un chiffre n'est pas précisé dans la source, écris « non précisé ».\\n- **Attribution systématique** : Attribue toute déclaration (« selon l'étude », « d'après les chiffres publiés par la BCE »).\\n- **Désaccords** : Si deux sources se contredisent sur un fait ou un chiffre, mentionne explicitement la divergence (« Source A indique X %, tandis que Source B rapporte Y % »).\\n\\n### 4. Règle de la Preuve Verbatim\\n- Pour chaque item, fournis obligatoirement le champ `preuve`.\\n- La preuve est un **extrait mot pour mot de 15 mots maximum**, copié tel quel depuis le titre ou le texte d'un article cité dans `article_ids`.\\n- Cet extrait sert de contrôle cryptographique/éditorial pour prouver que l'information n'a pas été inventée.\\n\\n### 5. Sélection & Quotas\\nSélectionne les sujets les plus marquants de la journée :\\n- Catégorie **IA** : exactement 4 items prioritaires (privilégie les annonces majeures et avancées techniques).\\n- Catégorie **Économie mondiale** : exactement 3 items prioritaires (taux, banques centrales, commerce mondial).\\n- Catégorie **Technologie** : exactement 3 items prioritaires (cybersécurité, matériel, télécoms, plateformes).\\nSi une catégorie compte moins d'articles exploitables, inclus tous les articles valides sans en inventer.\\n\\n### 6. Format de Sortie Strict\\n- Réponds UNIQUEMENT en JSON valide conforme au schéma fourni.\\n- **AUCUN champ lien ou URL** ne doit être généré (tous les liens sont reconstruits de façon sécurisée par le système n8n).\\n- Pour chaque item :\\n  * `titre` : 1 phrase courte et percutante.\\n  * `resume` : 2 phrases maximum, 45 mots maximum au total.\\n  * `article_ids` : tableau d'identifiants valides (ex: `[\\\"A001\\\", \\\"A014\\\"]`).\\n  * `preuve` : verbatim exact (≤ 15 mots).\\n  * `nature` : `\\\"fait_rapporte\\\"` | `\\\"annonce_entreprise\\\"` | `\\\"analyse\\\"`.\\n\";\n\nconst articlesMap = {};\nconst promptArticles = articles.map((art, idx) => {\n  const id = 'A' + String(idx + 1).padStart(3, '0');\n  articlesMap[id] = {\n    titre: art.titre,\n    source: art.source,\n    tier: art.tier,\n    type: art.type,\n    link: art.link,\n    texte: art.texte,\n    date_iso: art.date_iso\n  };\n  return {\n    article_id: id,\n    titre: art.titre,\n    source: art.source,\n    tier: art.tier,\n    type: art.type,\n    date: art.date_iso,\n    texte: art.texte\n  };\n});\n\nconst today = new Date().toISOString().slice(0, 10);\nconst userPrompt = 'Date du briefing : ' + today + '\\n\\n' +\n  'Voici la liste des ' + promptArticles.length + ' articles collectés pour le briefing quotidien :\\n\\n' +\n  JSON.stringify(promptArticles, null, 2);\n\nconst geminiPayload = {\n  system_instruction: {\n    parts: [{ text: systemPrompt }]\n  },\n  contents: [\n    {\n      role: \"user\",\n      parts: [{ text: userPrompt }]\n    }\n  ],\n  generationConfig: {\n    temperature: 0.1,\n    responseMimeType: \"application/json\",\n    responseSchema: {\n      type: \"OBJECT\",\n      properties: {\n        date: { type: \"STRING\" },\n        categories: {\n          type: \"ARRAY\",\n          items: {\n            type: \"OBJECT\",\n            properties: {\n              name: { type: \"STRING\" },\n              items: {\n                type: \"ARRAY\",\n                items: {\n                  type: \"OBJECT\",\n                  properties: {\n                    titre: { type: \"STRING\" },\n                    resume: { type: \"STRING\" },\n                    article_ids: { type: \"ARRAY\", items: { type: \"STRING\" } },\n                    preuve: { type: \"STRING\" },\n                    nature: { type: \"STRING\" }\n                  },\n                  required: [\"titre\", \"resume\", \"article_ids\", \"preuve\", \"nature\"]\n                }\n              }\n            },\n            required: [\"name\", \"items\"]\n          }\n        }\n      },\n      required: [\"date\", \"categories\"]\n    }\n  }\n};\n\nreturn [{\n  json: {\n    gemini_payload: geminiPayload,\n    articlesMap: articlesMap,\n    total_articles_sent: promptArticles.length\n  }\n}];"
+      },
+      "id": "prepare_gemini",
+      "name": "Prepare Gemini Payload",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1000,
+        600
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.gemini_payload) }}",
+        "options": {
+          "timeout": 120000
+        }
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "x2tFAYeo4Q8b4Ezg",
+          "name": "Gemini API Key"
+        }
+      },
+      "id": "call_gemini",
+      "name": "Call Gemini Flash",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1240,
+        600
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "const geminiRes = $input.first().json;\nconst prepareNode = $('Prepare Gemini Payload').first().json;\nconst articlesMap = prepareNode.articlesMap || {};\n\nfunction normalizeTextForComparison(text) {\n  if (!text) return '';\n  return text.toLowerCase()\n    .normalize('NFD').replace(/[\\u0300-\\u036f]/g, '')\n    .replace(/[^a-z0-9]/g, ' ')\n    .replace(/\\s+/g, ' ')\n    .trim();\n}\n\nfunction escapeHtml(str) {\n  if (!str) return '';\n  return str\n    .replace(/&/g, '&amp;')\n    .replace(/</g, '&lt;')\n    .replace(/>/g, '&gt;');\n}\n\nfunction extractNumbers(text) {\n  if (!text) return [];\n  let clean = text.replace(/(\\d)\\s+(\\d{3})\\b/g, '$1$2');\n  clean = clean.replace(/(\\d),(\\d{3})\\b/g, '$1$2');\n  clean = clean.replace(/(\\d),(\\d{1,2})\\b/g, '$1.$2');\n  const matches = clean.match(/[-+]?\\b\\d+(?:\\.\\d+)?%?\\b/g) || [];\n  return matches.map(m => m.replace('%', ''));\n}\n\nlet parsedSummary = null;\nlet parseError = null;\n\ntry {\n  let rawText = '';\n  if (geminiRes.candidates && geminiRes.candidates[0] && geminiRes.candidates[0].content && geminiRes.candidates[0].content.parts) {\n    rawText = geminiRes.candidates[0].content.parts[0].text;\n  } else if (geminiRes.text) {\n    rawText = geminiRes.text;\n  }\n  parsedSummary = JSON.parse(rawText);\n} catch (e) {\n  parseError = e.message;\n}\n\nif (!parsedSummary || !parsedSummary.categories) {\n  let failureReason = \"JSON Gemini invalide ou introuvable : \" + (parseError || \"Structure categories absente\");\n  if (geminiRes && geminiRes.error) {\n    if (geminiRes.error.status === 429 || (geminiRes.error.message && geminiRes.error.message.includes('429'))) {\n      failureReason = \"Quota Gemini dépassé (Rate Limit 429)\";\n    } else {\n      failureReason = \"Erreur Gemini API : \" + (geminiRes.error.message || JSON.stringify(geminiRes.error));\n    }\n  }\n  return [{\n    json: {\n      status: \"error\",\n      publishable: false,\n      alert_reason: failureReason,\n      error: failureReason,\n      raw_response: geminiRes\n    }\n  }];\n}\n\nconst validatedCategories = [];\nconst allValidItems = [];\nconst rejectedItems = [];\n\nfor (const cat of parsedSummary.categories) {\n  const catName = cat.name;\n  const validItemsInCat = [];\n\n  for (const item of (cat.items || [])) {\n    if (!item.article_ids || !Array.isArray(item.article_ids) || item.article_ids.length === 0) {\n      rejectedItems.push({ item, category: catName, reason: \"Aucun article_id fourni\" });\n      continue;\n    }\n\n    const citedArticles = [];\n    let unknownId = null;\n    for (const id of item.article_ids) {\n      if (!articlesMap[id]) {\n        unknownId = id;\n        break;\n      }\n      citedArticles.push(articlesMap[id]);\n    }\n\n    if (unknownId) {\n      rejectedItems.push({ item, category: catName, reason: \"Article ID '\" + unknownId + \"' inconnu dans le mapping RSS\" });\n      continue;\n    }\n\n    const rawProof = (item.preuve || '').trim();\n    const normProof = normalizeTextForComparison(rawProof);\n    const proofWords = rawProof.split(/\\s+/).filter(w => w.length > 0);\n\n    if (normProof.length < 10) {\n      rejectedItems.push({ item, category: catName, reason: \"Preuve trop courte (< 10 caractères normalisés) : '\" + rawProof + \"'\" });\n      continue;\n    }\n    if (proofWords.length > 15) {\n      rejectedItems.push({ item, category: catName, reason: \"Preuve dépasse 15 mots (\" + proofWords.length + \" mots)\" });\n      continue;\n    }\n\n    let proofFound = false;\n    for (const art of citedArticles) {\n      const normSource = normalizeTextForComparison(art.titre + ' ' + (art.texte || ''));\n      if (normSource.includes(normProof)) {\n        proofFound = true;\n        break;\n      }\n    }\n\n    if (!proofFound) {\n      rejectedItems.push({ item, category: catName, reason: \"Preuve non trouvée textuellement dans les articles cités : '\" + rawProof + \"'\" });\n      continue;\n    }\n\n    const numbersInItem = extractNumbers((item.titre || '') + ' ' + (item.resume || ''));\n    const sourceNumbers = new Set();\n    citedArticles.forEach(art => {\n      extractNumbers(art.titre + ' ' + (art.texte || '')).forEach(n => sourceNumbers.add(n));\n    });\n\n    let halluNum = null;\n    for (const num of numbersInItem) {\n      if (!sourceNumbers.has(num)) {\n        halluNum = num;\n        break;\n      }\n    }\n\n    if (halluNum) {\n      rejectedItems.push({ item, category: catName, reason: \"Chiffre '\" + halluNum + \"' absent des textes sources cités\" });\n      continue;\n    }\n\n    const sources = citedArticles.map(art => ({\n      source: art.source,\n      link: art.link,\n      tier: art.tier\n    }));\n\n    const distinctSourceNames = new Set(sources.map(s => s.source));\n    const confirmation = distinctSourceNames.size >= 2\n      ? \"Confirmé par \" + distinctSourceNames.size + \" sources\"\n      : \"Source unique\";\n\n    const sanitizedTitle = escapeHtml(item.titre);\n    const sanitizedResume = escapeHtml(item.resume);\n\n    const validItem = {\n      titre: sanitizedTitle,\n      resume: sanitizedResume,\n      nature: item.nature || 'fait_rapporte',\n      confirmation: confirmation,\n      sources: sources,\n      article_ids: item.article_ids,\n      preuve_verbatim: item.preuve\n    };\n\n    validItemsInCat.push(validItem);\n    allValidItems.push(validItem);\n  }\n\n  validatedCategories.push({\n    name: catName,\n    items: validItemsInCat,\n    count: validItemsInCat.length\n  });\n}\n\nconst configNode = $('Config').first().json || {};\nlet publishable = true;\nconst quotaDeficits = [];\nfor (const cat of validatedCategories) {\n  if (cat.items.length < 1) {\n    if (!configNode.test_mode) {\n      publishable = false;\n    }\n    quotaDeficits.push(cat.name + \" (\" + cat.items.length + \" item(s))\");\n  }\n}\nif (allValidItems.length < 3) {\n  publishable = false;\n  quotaDeficits.push(\"Moins de 3 actualités validées au total (\" + allValidItems.length + \")\");\n}\n\nreturn [{\n  json: {\n    status: publishable ? \"success\" : \"warning\",\n    publishable: publishable,\n    alert_needed: !publishable,\n    alert_reason: publishable ? null : \"Seuil minimal non atteint : \" + quotaDeficits.join(\", \"),\n    date: parsedSummary.date || new Date().toISOString().slice(0, 10),\n    categories: validatedCategories,\n    total_valid_items: allValidItems.length,\n    rejected_items: rejectedItems,\n    stats: {\n      total_items_generated: rejectedItems.length + allValidItems.length,\n      valid_count: allValidItems.length,\n      rejected_count: rejectedItems.length\n    }\n  }\n}];"
+      },
+      "id": "valider_reconstruire",
+      "name": "Valider & Reconstruire",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1480,
+        600
+      ]
+    },
+    {
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "const data = $input.first().json;\nconst config = $('Config').first().json || {};\nconst today = data.date || new Date().toISOString().slice(0, 10);\nconst staticData = $getWorkflowStaticData('global');\nif (!staticData.subscribers) staticData.subscribers = {};\n\nlet isScheduleTrigger = false;\ntry {\n  isScheduleTrigger = Boolean($('Schedule Trigger').first());\n} catch (e) {}\n\nif (isScheduleTrigger && staticData.lastSentDate === today && !config.test_mode) {\n  return [];\n}\n\nif (!data.publishable) {\n  const alertText = '🚨 <b>ALERTE ÉDITORIALE N8N</b>\\n\\n' +\n    'Le briefing du <b>' + today + '</b> n\\'a pas été publié.\\n' +\n    '• <b>Raison :</b> ' + (data.alert_reason || 'Seuil minimal non atteint') + '\\n' +\n    '• <b>Actualités validées :</b> ' + (data.total_valid_items || 0) + '\\n\\n' +\n    '<i>Vérifiez les flux RSS ou le journal des rejets dans n8n.</i>';\n\n  return [{\n    json: {\n      chatId: config.admin_chat_id,\n      text: alertText,\n      is_alert: true,\n      published_urls: []\n    }\n  }];\n}\n\nconst categoryEmojis = {\n  'IA': '🤖',\n  'Économie mondiale': '🌍',\n  'Technologie': '💻'\n};\n\nconst natureLabels = {\n  'annonce_entreprise': \"annonce de l'entreprise\",\n  'donnees_officielles': \"données officielles\",\n  'fait_rapporte': \"fait rapporté\",\n  'analyse': \"analyse\"\n};\n\nconst categoryHeaders = {\n  'IA': '🤖 <b>I N T E L L I G E N C E   A R T I F I C I E L L E</b>',\n  'Économie mondiale': '🌍 <b>É C O N O M I E   M O N D I A L E</b>',\n  'Technologie': '💻 <b>T E C H N O L O G I E</b>'\n};\n\nconst allUrls = [];\nconst categorySections = [];\nconst categorySummaries = {};\n\nfor (const cat of (data.categories || [])) {\n  if (!cat.items || cat.items.length === 0) continue;\n  const emoji = categoryEmojis[cat.name] || '📌';\n  const catTitle = categoryHeaders[cat.name] || (emoji + ' <b>' + cat.name.toUpperCase() + '</b>');\n  let sectionText = '━━━━━━━━━━━━━━━━━━━━\\n' + catTitle + '\\n────────────────────\\n\\n';\n\n  cat.items.forEach((item, idx) => {\n    const nat = natureLabels[item.nature] || item.nature || 'information';\n    const links = (item.sources || []).map(s => {\n      allUrls.push(s.link);\n      return '👉 <a href=\"' + s.link + '\"><b>Lire l\\'article (' + s.source + ') ↗</b></a>';\n    }).join('\\n');\n\n    const num = String(idx + 1).padStart(2, '0');\n    sectionText += '<b>' + num + ' ❯ ' + item.titre + '</b>\\n' +\n      '<blockquote>' + item.resume + '\\n\\n' +\n      '🏷️ <code>' + nat + '</code>  •  ✅ <code>' + item.confirmation + '</code></blockquote>\\n' +\n      links + '\\n\\n';\n  });\n\n  const trimmed = sectionText.trim();\n  categorySections.push(trimmed);\n\n  const lowerName = cat.name.toLowerCase();\n  if (cat.name === 'IA' || lowerName.includes('artificielle')) {\n    categorySummaries['ia'] = trimmed;\n  } else if (lowerName.includes('éco') || lowerName.includes('eco')) {\n    categorySummaries['eco'] = trimmed;\n  } else if (lowerName.includes('tech')) {\n    categorySummaries['tech'] = trimmed;\n  }\n}\n\nconst header = '⚡ <b>BRIEFING QUOTIDIEN</b> <code>DU ' + today + '</code>\\n' +\n  '<i>Économie mondiale · Technologies · Intelligence Artificielle</i>\\n\\n';\n\nconst messages = [];\nlet currentBody = header;\n\nfor (const section of categorySections) {\n  if ((currentBody + section).length > 3800) {\n    if (currentBody.trim() !== header.trim()) {\n      messages.push(currentBody.trim());\n      currentBody = section + '\\n\\n';\n    } else {\n      messages.push(currentBody + section);\n      currentBody = '';\n    }\n  } else {\n    currentBody += section + '\\n\\n';\n  }\n}\n\nif (currentBody.trim().length > 0) {\n  messages.push(currentBody.trim());\n}\n\nif (messages.length > 1 && !messages[0].includes('BRIEFING QUOTIDIEN')) {\n  messages[0] = header + messages[0];\n}\n\nstaticData.latestSummary = messages;\nstaticData.latestSummaryDate = today;\nstaticData.categorySummaries = categorySummaries;\n\nconst uniqueUrls = [...new Set(allUrls)];\n\nconst recipientChatIds = new Set();\n\nif (config.test_mode) {\n  if (config.admin_chat_id) recipientChatIds.add(String(config.admin_chat_id));\n} else {\n  const subs = Object.keys(staticData.subscribers || {});\n  for (const s of subs) {\n    recipientChatIds.add(String(s));\n  }\n  if (config.admin_chat_id) {\n    recipientChatIds.add(String(config.admin_chat_id));\n  }\n}\n\nif (recipientChatIds.size === 0 && config.telegram_chat_id) {\n  recipientChatIds.add(String(config.telegram_chat_id));\n}\n\nconst outputItems = [];\nfor (const cid of recipientChatIds) {\n  messages.forEach((msgText, idx) => {\n    outputItems.push({\n      json: {\n        chatId: cid,\n        text: msgText,\n        part: (idx + 1) + '/' + messages.length,\n        is_alert: false,\n        published_urls: uniqueUrls,\n        today_date: today,\n        recipient_id: cid\n      }\n    });\n  });\n}\n\nreturn outputItems;"
+      },
+      "id": "formater_telegram",
+      "name": "Formater Messages Telegram",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1720,
+        600
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.chatId }}",
+        "text": "={{ $json.text }}",
+        "replyMarkup": "none",
+        "additionalFields": {
+          "parse_mode": "HTML",
+          "disable_web_page_preview": true,
+          "appendAttribution": false
+        }
+      },
+      "credentials": {
+        "telegramApi": {
+          "id": "urLGI1jqIbAUO4AB",
+          "name": "Telegram account 3"
+        }
+      },
+      "id": "send_telegram",
+      "name": "Send Telegram Message",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1960,
+        600
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "const items = $input.all();\nconst staticData = $getWorkflowStaticData('global');\nif (!staticData.sentUrls) staticData.sentUrls = {};\n\nconst now = Date.now();\nlet recordedCount = 0;\nlet todayDate = new Date().toISOString().slice(0, 10);\n\nfor (const item of items) {\n  const d = item.json;\n  const err = d.error || (d.result && d.result.description) || '';\n  if (typeof err === 'string' && (err.includes('blocked') || err.includes('deactivated') || err.includes('chat not found'))) {\n    const blockedChatId = d.recipient_id || d.chatId;\n    if (blockedChatId && staticData.subscribers && staticData.subscribers[blockedChatId]) {\n      delete staticData.subscribers[blockedChatId];\n    }\n  }\n\n  if (d.today_date) todayDate = d.today_date;\n  const urls = d.published_urls || [];\n  for (const u of urls) {\n    if (!staticData.sentUrls[u]) {\n      staticData.sentUrls[u] = now;\n      recordedCount++;\n    }\n  }\n}\n\nstaticData.lastSentDate = todayDate;\n\nreturn [{\n  json: {\n    status: \"success\",\n    message: \"Envoi Telegram terminé avec succès\",\n    recorded_urls_count: recordedCount,\n    total_stored_urls: Object.keys(staticData.sentUrls).length,\n    lastSentDate: todayDate,\n    completed_at: new Date().toISOString()\n  }\n}];"
+      },
+      "id": "enregistrer_sent",
+      "name": "Enregistrer URLs Sent",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2200,
+        600
+      ]
+    }
+  ],
+  "connections": {
+    "Telegram Bot Trigger": {
+      "main": [
+        [
+          {
+            "node": "Bot Router & Handler",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Bot Router & Handler": {
+      "main": [
+        [
+          {
+            "node": "Send Bot Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook Test": {
+      "main": [
+        [
+          {
+            "node": "Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config": {
+      "main": [
+        [
+          {
+            "node": "Liste Flux RSS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Liste Flux RSS": {
+      "main": [
+        [
+          {
+            "node": "Lecture RSS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lecture RSS": {
+      "main": [
+        [
+          {
+            "node": "Normaliser",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normaliser": {
+      "main": [
+        [
+          {
+            "node": "Prepare Gemini Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Gemini Payload": {
+      "main": [
+        [
+          {
+            "node": "Call Gemini Flash",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call Gemini Flash": {
+      "main": [
+        [
+          {
+            "node": "Valider & Reconstruire",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Valider & Reconstruire": {
+      "main": [
+        [
+          {
+            "node": "Formater Messages Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Formater Messages Telegram": {
+      "main": [
+        [
+          {
+            "node": "Send Telegram Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Telegram Message": {
+      "main": [
+        [
+          {
+            "node": "Enregistrer URLs Sent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "timezone": "Africa/Algiers",
+    "executionOrder": "v1",
+    "errorWorkflow": "zKFaHdrHGON7zKVu",
+    "saveManualExecutions": true,
+    "saveDataSuccessExecution": "all",
+    "saveDataErrorExecution": "all"
+  }
+}

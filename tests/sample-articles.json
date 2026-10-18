@@ -1,0 +1,142 @@
+{
+  "source_articles": [
+    {
+      "id": "A001",
+      "titre": "OpenAI announces GPT-5 with specialized agentic capabilities",
+      "source": "OpenAI",
+      "tier": 1,
+      "type": "annonce_entreprise",
+      "date_iso": "2026-10-17T12:00:00.000Z",
+      "link": "https://openai.com/news/gpt-5",
+      "categorie": "ia",
+      "texte": "Today OpenAI announced its next generation frontier model GPT-5. The model features 500 billion active parameters and shows a 45% reduction in latency for complex coding workflows."
+    },
+    {
+      "id": "A002",
+      "titre": "ECB cuts deposit facility rate by 25 basis points to 3.25 percent",
+      "source": "BCE / ECB Press",
+      "tier": 1,
+      "type": "donnees_officielles",
+      "date_iso": "2026-10-17T13:00:00.000Z",
+      "link": "https://www.ecb.europa.eu/press/pr/20261017.html",
+      "categorie": "economie",
+      "texte": "The Governing Council of the ECB today decided to lower the deposit facility rate by 25 basis points to 3.25 percent, noting that disinflation is well on track across the euro area."
+    },
+    {
+      "id": "A003",
+      "titre": "Major cyberattack impacts European energy & utility grid <infrastructure>",
+      "source": "Ars Technica",
+      "tier": 3,
+      "type": "reportage",
+      "date_iso": "2026-10-17T14:00:00.000Z",
+      "link": "https://arstechnica.com/security/2026/10/energy-grid-attack",
+      "categorie": "tech",
+      "texte": "Security researchers detected sophisticated ransomware targeting regional energy providers in Central Europe. Over 120 substation controllers were temporarily disconnected."
+    }
+  ],
+  "gemini_test_outputs": {
+    "valid_output": {
+      "date": "2026-10-17",
+      "categories": [
+        {
+          "name": "IA",
+          "items": [
+            {
+              "titre": "OpenAI annonce son nouveau modèle GPT-5",
+              "resume": "OpenAI présente GPT-5, axé sur les flux agentiques complexes. L'entreprise met en avant une réduction de latence de 45% sur le code.",
+              "article_ids": ["A001"],
+              "preuve": "next generation frontier model GPT-5",
+              "nature": "annonce_entreprise"
+            }
+          ]
+        },
+        {
+          "name": "Économie mondiale",
+          "items": [
+            {
+              "titre": "La BCE abaisse son taux de dépôt à 3.25 pour cent",
+              "resume": "La Banque centrale européenne a réduit son taux de 25 points de base. L'institution note que la désinflation est bien engagée.",
+              "article_ids": ["A002"],
+              "preuve": "deposit facility rate by 25 basis points to 3.25 percent",
+              "nature": "donnees_officielles"
+            }
+          ]
+        },
+        {
+          "name": "Technologie",
+          "items": [
+            {
+              "titre": "Cyberattaque contre des infrastructures énergétiques en Europe & filiales <critiques>",
+              "resume": "Des chercheurs signalent une attaque par ransomware visant des fournisseurs régionaux d'énergie. Plus de 120 contrôleurs ont été déconnectés.",
+              "article_ids": ["A003"],
+              "preuve": "sophisticated ransomware targeting regional energy providers",
+              "nature": "fait_rapporte"
+            }
+          ]
+        }
+      ]
+    },
+    "trapped_outputs": [
+      {
+        "test_name": "Piège 1: ID d'article inventé (A999)",
+        "expected_result": "rejected",
+        "expected_reason": "Article ID 'A999' inconnu",
+        "item": {
+          "titre": "Une entreprise inconnue lève des fonds",
+          "resume": "Une levée de fonds a eu lieu selon des sources.",
+          "article_ids": ["A999"],
+          "preuve": "next generation frontier model",
+          "nature": "fait_rapporte"
+        }
+      },
+      {
+        "test_name": "Piège 2: Preuve verbatim fausse / hallucinée",
+        "expected_result": "rejected",
+        "expected_reason": "Preuve non trouvée textuellement dans l'article source",
+        "item": {
+          "titre": "OpenAI dévoile ses futures orientations",
+          "resume": "OpenAI poursuit le développement de ses outils d'automatisation.",
+          "article_ids": ["A001"],
+          "preuve": "cette phrase est totalement inventee par le llm",
+          "nature": "annonce_entreprise"
+        }
+      },
+      {
+        "test_name": "Piège 3: Chiffre inventé dans le résumé (88% au lieu de 45%)",
+        "expected_result": "rejected",
+        "expected_reason": "Chiffre '88' absent des articles sources",
+        "item": {
+          "titre": "OpenAI améliore ses performances",
+          "resume": "Selon OpenAI, le nouveau modèle réduit les erreurs de 88% sur les tests.",
+          "article_ids": ["A001"],
+          "preuve": "next generation frontier model GPT-5",
+          "nature": "annonce_entreprise"
+        }
+      },
+      {
+        "test_name": "Piège 4: Chiffre inventé dans le titre (999 substations)",
+        "expected_result": "rejected",
+        "expected_reason": "Chiffre '999' absent des articles sources",
+        "item": {
+          "titre": "Attaque contre 999 stations électriques",
+          "resume": "Des chercheurs signalent une attaque par ransomware visant des fournisseurs d'énergie.",
+          "article_ids": ["A003"],
+          "preuve": "sophisticated ransomware targeting regional energy providers",
+          "nature": "fait_rapporte"
+        }
+      },
+      {
+        "test_name": "Piège 5: Titre avec balises HTML non échappées <script> et &",
+        "expected_result": "sanitized",
+        "expected_reason": "Échappement des caractères HTML &amp; &lt;script&gt;",
+        "item": {
+          "titre": "Alerte <script>alert('hack')</script> & failles critiques",
+          "resume": "Une vulnérabilité a été découverte dans des contrôleurs de sous-stations déconnectés.",
+          "article_ids": ["A003"],
+          "preuve": "120 substation controllers were temporarily disconnected",
+          "nature": "fait_rapporte"
+        }
+      }
+    ]
+  }
+}

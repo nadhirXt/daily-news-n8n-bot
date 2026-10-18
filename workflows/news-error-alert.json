@@ -1,0 +1,83 @@
+{
+  "name": "News – Error Alert",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "error_trigger",
+      "name": "Error Trigger",
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "const errorData = $input.first().json;\nconst execution = errorData.execution || {};\nconst workflow = errorData.workflow || {};\nconst lastNode = errorData.lastNodeExecuted || 'Nœud non spécifié';\nconst rawError = errorData.error || {};\nconst errorMsg = rawError.message || (typeof rawError === 'string' ? rawError : JSON.stringify(rawError));\n\nfunction escapeHtml(str) {\n  if (!str) return '';\n  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');\n}\n\nconst safeMsg = escapeHtml(errorMsg.slice(0, 1000));\nconst safeNode = escapeHtml(lastNode);\nconst safeWfName = escapeHtml(workflow.name || 'News Pipeline');\n\nconst text = '🚨 <b>ALERTE WORKFLOW N8N</b>\\n\\n' +\n  '• <b>Workflow :</b> ' + safeWfName + ' (ID: ' + (workflow.id || 'N/A') + ')\\n' +\n  '• <b>Nœud en échec :</b> ' + safeNode + '\\n' +\n  '• <b>Date :</b> ' + new Date().toISOString() + '\\n' +\n  '• <b>Détail erreur :</b>\\n<code>' + safeMsg + '</code>\\n\\n' +\n  '⚠️ <i>Vérifiez les exécutions dans l\\'interface n8n.</i>';\n\nreturn [{\n  json: {\n    text: text,\n    // ID Telegram administrateur pour réception des alertes d'erreur\n    chat_id: \"YOUR_ADMIN_CHAT_ID\"\n  }\n}];"
+      },
+      "id": "format_error",
+      "name": "Format Error Alert",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.chat_id }}",
+        "text": "={{ $json.text }}",
+        "additionalFields": {
+          "parse_mode": "HTML",
+          "disable_web_page_preview": true,
+          "appendAttribution": false
+        }
+      },
+      "credentials": {
+        "telegramApi": {
+          "id": "urLGI1jqIbAUO4AB",
+          "name": "Telegram account 3"
+        }
+      },
+      "id": "telegram_error_alert",
+      "name": "Send Error Alert",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        480,
+        0
+      ]
+    }
+  ],
+  "connections": {
+    "Error Trigger": {
+      "main": [
+        [
+          {
+            "node": "Format Error Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Error Alert": {
+      "main": [
+        [
+          {
+            "node": "Send Error Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "timezone": "Africa/Algiers",
+    "executionOrder": "v1"
+  }
+}
